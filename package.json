@@ -12,6 +12,9 @@
     "check": "astro check",
     "astro": "astro",
     "i18n": "node scripts/check-i18n-parity.mjs",
+    "copy-editor:build": "node scripts/build-copy-editor-payload.mjs",
+    "copy-editor:apply": "node scripts/apply-copy-edits.mjs",
+    "copy-editor:check": "node scripts/check-copy-editor-sync.mjs",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   },
   "dependencies": {

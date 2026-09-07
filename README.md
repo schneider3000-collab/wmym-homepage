@@ -65,6 +65,25 @@ The whole thing is dev-only: `src/dev/copy-editor-plugin.mjs` registers with
 `apply: 'serve'` and the component renders behind `import.meta.env.DEV`, so no markup,
 CSS or script reaches a build. Verified — `npm run build` still emits zero JS bundles.
 
+### Editing copy without a dev server
+
+There is also a standalone page — a Claude Artifact, not part of this build — that lists
+every string in `de.ts`/`en.ts` with editable German and English fields side by side, for
+editing from a plain browser without running `npm run dev` at all. Its URL is recorded in
+`.claude/copy-editor.json`. Edits made there don't touch this repository directly; they
+queue in the artifact's own database until Claude reads them back with `node
+scripts/apply-copy-edits.mjs` and applies them to `de.ts`/`en.ts` as a normal patch.
+
+Because that sync step is manual, a pre-commit check
+(`scripts/check-copy-editor-sync.mjs`) blocks a commit if edits were pulled from the
+artifact and left unapplied mid-sync (tracked in the gitignored
+`.claude/copy-editor-pending.json`). It is a no-op anywhere else — a plain clone or CI,
+which never has that scratch file, always passes. Skip it deliberately with
+`SKIP_COPY_EDITOR_CHECK=1 git commit …`, the same pattern as `SKIP_I18N_CHECK`.
+
+Regenerate the artifact's content snapshot with `npm run copy-editor:build` and republish
+it whenever keys are added, renamed or removed in `de.ts`/`en.ts`.
+
 ### Keeping the two languages in step
 
 Two different failure modes, two different guards:

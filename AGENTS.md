@@ -14,7 +14,7 @@ astro dev --background
 
 Manage it with `astro dev stop`, `astro dev status`, `astro dev logs`.
 
-## Four things to know
+## Five things to know
 
 **Copy lives in two files, not in the templates.** `src/content/de.ts` is the source
 of truth; `src/content/en.ts` is annotated with `SiteContent` (derived from `de.ts`),
@@ -35,9 +35,20 @@ gated behind `import.meta.env.DEV` and a Vite plugin with `apply: 'serve'`. If y
 touch it, re-check that `npm run build` still emits zero JS bundles and no trace of it
 in `dist/`.
 
+**A remote copy editor writes to a queue, not to disk.** `.claude/copy-editor.json`
+points at a standalone Claude Artifact where edits can be made without a dev server;
+those edits land in the artifact's database, not in `de.ts`/`en.ts`. Before finishing
+any session, read that database (if the config file exists) and apply pending edits
+with `node scripts/apply-copy-edits.mjs` — see README.md's "Editing copy without a dev
+server". `.claude/copy-editor-pending.json` is scratch state for a sync in progress; a
+pre-commit check blocks a commit while it holds unapplied edits.
+
 ## Before finishing
 
 ```
 npm run check    # types + German/English structural parity
 npm run build    # must stay at 0 JS bundles
 ```
+
+If `.claude/copy-editor.json` exists, also check the artifact's `edits` collection for
+pending changes and sync them (see above) before committing.

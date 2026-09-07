@@ -1,0 +1,5 @@
+{
+  "artifactUrl": "https://claude.ai/code/artifact/15bb4b43-4f58-4af1-a6d9-b636590d19ff",
+  "dbCollection": "edits",
+  "note": "Presence of this file is what turns on the copy-editor pre-commit check. Regenerate the artifact's payload with `node scripts/build-copy-editor-payload.mjs` and republish it whenever keys are added, renamed, or removed in de.ts/en.ts."
+}

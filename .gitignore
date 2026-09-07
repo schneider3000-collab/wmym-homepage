@@ -30,6 +30,9 @@ pnpm-debug.log*
 *.swo
 *~
 
+# copy-editor sync scratch state — local, mid-sync only (see .claude/copy-editor.json)
+.claude/copy-editor-pending.json
+
 # OS cruft
 .DS_Store
 Thumbs.db
