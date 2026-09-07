@@ -57,17 +57,14 @@ jobs:
       - run: npm run build
         env:
           # ---------------------------------------------------------------
-          # WHERE THE SITE LIVES. To move to the real domain, do all three:
-          #   1. SITE:      https://whatmakesyoumove.org
-          #   2. BASE_PATH: delete the line entirely
-          #   3. add public/CNAME containing: whatmakesyoumove.org
-          #      (this is what flips GitHub to the custom domain, so add it
-          #       only once DNS resolves - until then it kills the preview URL)
-          # Dropping BASE_PATH also re-enables indexing: robots.txt and the
-          # noindex meta tag both key off it.
+          # WHERE THE SITE LIVES. Served from its own domain, so no BASE_PATH.
+          # The custom domain is set by public/CNAME, which must stay in the
+          # build artifact: with an Actions deploy, setting the domain only in
+          # Settings > Pages gets wiped by the next deploy.
+          # No BASE_PATH also means this is not a preview, so robots.txt and
+          # the noindex meta tag allow indexing again.
           # ---------------------------------------------------------------
-          SITE: https://schneider3000-collab.github.io
-          BASE_PATH: /wmym-homepage
+          SITE: https://whatmakesyoumove.org
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
