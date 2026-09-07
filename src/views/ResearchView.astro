@@ -1,0 +1,175 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Faq from '../components/Faq.astro';
+import { useContent, route } from '../content';
+import type { Locale } from '../content';
+import uniBanner from '../assets/images/portrait-uni-quer.jpg';
+import team from '../assets/images/forschung-team.jpg';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = useContent(locale);
+const r = c.research;
+---
+
+<BaseLayout locale={locale} current="research" title={r.title} description={r.description}>
+  <PageHero eyebrow={r.eyebrow} headline={r.headline} lede={r.lede} />
+
+  <figure class="banner">
+    <Image src={uniBanner} alt={r.heroImageAlt} widths={[900, 1400]} sizes="100vw" loading="lazy" />
+  </figure>
+
+  <section class="section" aria-labelledby="project-heading">
+    <div class="shell project">
+      <p class="eyebrow">{r.projectEyebrow}</p>
+      <h2 id="project-heading">{r.projectTitle}</h2>
+      <div class="project-body prose">
+        {r.projectBody.map((para) => <p>{para}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section band-sunk" aria-labelledby="team-heading">
+    <div class="shell split">
+      <div>
+        <h2 id="team-heading">{r.teamHeadline}</h2>
+        <p class="lede">{r.teamIntro}</p>
+        <ul class="team">
+          {r.team.map((member) => (
+            <li>
+              <span class="team-name">{member.name}</span>
+              <span class="team-role">{member.role}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="funding">{r.funding}</p>
+      </div>
+      <figure>
+        <Image src={team} alt={r.teamImageAlt} widths={[420, 640]} sizes="(min-width: 62rem) 24rem, 85vw" loading="lazy" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="relevance-heading">
+    <div class="shell">
+      <h2 id="relevance-heading">{r.relevanceHeadline}</h2>
+      <div class="grid grid-3 relevance">
+        {r.relevance.map((item) => (
+          <article class="card">
+            <h3>{item.who}</h3>
+            <p>{item.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section band-ink" aria-labelledby="bridge-heading">
+    <div class="shell bridge">
+      <h2 id="bridge-heading">{r.bridgeHeadline}</h2>
+      <p>{r.bridgeBody}</p>
+      <a class="btn btn-bridge" href={`${route(locale, 'offerings')}#balance`}>{r.bridgeCta}</a>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="next-heading">
+    <div class="shell next-grid">
+      <div>
+        <h2 id="next-heading">{r.nextHeadline}</h2>
+        <p class="next-body">{r.nextBody}</p>
+      </div>
+      <div class="aside">
+        <h3 class="eyebrow">{r.focusHeadline}</h3>
+        <ul class="tags">
+          {r.focus.map((f) => <li>{f}</li>)}
+        </ul>
+
+        <h3 class="eyebrow spaced">{r.linksHeadline}</h3>
+        <ul class="links">
+          {r.links.map((l) => (
+            <li><a href={l.href} rel="noopener" target="_blank">{l.label} ↗</a></li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="band-sunk">
+    <Faq headline={r.faqHeadline} intro={c.common.faqIntro} items={r.faq} id="faq-forschung" />
+  </div>
+</BaseLayout>
+
+<style>
+  .banner { margin: 0; }
+  .banner :global(img) {
+    width: 100%;
+    max-height: 26rem;
+    object-fit: cover;
+    object-position: center 35%;
+  }
+
+  .project { max-width: 52rem; }
+  .project h2 { margin-block: var(--space-2xs) var(--space-m); }
+  .project-body p { color: var(--ink-soft); }
+  .project-body p:first-child {
+    font-size: var(--step-1);
+    line-height: 1.55;
+    color: var(--ink);
+  }
+
+  .split { display: grid; gap: var(--space-l); align-items: start; }
+  @media (min-width: 62rem) {
+    .split { grid-template-columns: minmax(0, 1fr) 24rem; gap: var(--space-2xl); }
+  }
+  .split .lede { margin-block-start: var(--space-s); font-size: var(--step-0); }
+  .split figure { margin: 0; }
+  .split figure :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--rule);
+  }
+
+  .team { list-style: none; padding: 0; margin-block: var(--space-m); display: grid; gap: 0; }
+  .team li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.2rem 0.75rem;
+    padding-block: 0.6rem;
+    border-bottom: 1px solid var(--rule);
+    font-size: var(--step--1);
+  }
+  .team-name { font-weight: 500; min-width: 12rem; }
+  .team-role { color: var(--ink-faint); }
+  .funding { font-size: var(--step--1); color: var(--ink-faint); font-style: italic; }
+
+  .relevance { margin-block-start: var(--space-l); }
+  .relevance h3 { font-size: var(--step-0); font-family: var(--font-body); font-weight: 600; }
+  .relevance p { margin-block-start: var(--space-xs); color: var(--ink-soft); font-size: var(--step--1); line-height: 1.65; }
+
+  .bridge { max-width: 42rem; }
+  .bridge p { margin-block: var(--space-m) var(--space-l); color: #d8d4cb; }
+  .btn-bridge { background: var(--paper); color: var(--paper-ink); }
+
+  .next-grid { display: grid; gap: var(--space-xl); align-items: start; }
+  @media (min-width: 62rem) {
+    .next-grid { grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--space-2xl); }
+  }
+  .next-body { margin-block-start: var(--space-m); color: var(--ink-soft); max-width: 60ch; }
+
+  .aside h3 { display: block; }
+  .aside .spaced { margin-block-start: var(--space-l); }
+  .tags { list-style: none; padding: 0; margin-block-start: var(--space-s); display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .tags li {
+    padding: 0.25em 0.7em;
+    border: 1px solid var(--rule-strong);
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+  }
+  .links { list-style: none; padding: 0; margin-block-start: var(--space-s); display: grid; gap: 0.5rem; }
+  .links a { font-size: var(--step--1); }
+</style>

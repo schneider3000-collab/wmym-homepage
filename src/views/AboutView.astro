@@ -1,0 +1,290 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { useContent } from '../content';
+import type { Locale } from '../content';
+import portrait from '../assets/images/portrait-studio.jpg';
+import w1 from '../assets/images/werk-01-kraehen-1.jpg';
+import w2 from '../assets/images/werk-02-kraehen-2.jpg';
+import w3 from '../assets/images/werk-03-krahh.jpg';
+import w4 from '../assets/images/werk-04-vulkanlandschaft.jpg';
+import w5 from '../assets/images/werk-05-rhino.jpg';
+import w6 from '../assets/images/werk-06-ele.jpg';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = useContent(locale);
+const a = c.about;
+const artImages = [w1, w2, w3, w4, w5, w6];
+const orcid = 'https://orcid.org/0000-0002-0724-8282';
+---
+
+<BaseLayout locale={locale} current="about" title={a.title} description={a.description}>
+  <PageHero eyebrow={a.eyebrow} headline={a.headline} lede={a.lede} />
+
+  <section class="section" aria-labelledby="who-heading">
+    <div class="shell intro">
+      <figure class="portrait figure-portrait">
+        <Image src={portrait} alt={a.portraitAlt} widths={[420, 640]} sizes="(min-width: 62rem) 24rem, 85vw" loading="lazy" />
+      </figure>
+      <div>
+        <dl class="meta">
+          {a.meta.map((item) => (
+            <div>
+              <dt>{item.label}</dt>
+              <dd>{item.value}</dd>
+            </div>
+          ))}
+        </dl>
+        <h2 id="who-heading">{a.whoHeadline}</h2>
+        {a.whoBody.map((p) => <p class="para">{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section band-sunk" aria-labelledby="story-heading">
+    <div class="shell">
+      <h2 id="story-heading">{a.storyHeadline}</h2>
+      <div class="story prose">
+        {a.storyBody.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="timeline-heading">
+    <div class="shell">
+      <h2 id="timeline-heading">{a.timelineHeadline}</h2>
+      <ol class="timeline">
+        {a.timeline.map((item) => (
+          <li>
+            <p class="period">{item.period}</p>
+            <div>
+              <h3>{item.title}</h3>
+              <p class="entry-body">{item.body}</p>
+            </div>
+          </li>
+        ))}
+        <li>
+          <p class="period">{a.timelineStations.title}</p>
+          <div>
+            <h3>{a.timelineStations.places}</h3>
+            <p class="entry-body">{a.timelineStations.body}</p>
+          </div>
+        </li>
+      </ol>
+      <p class="vita"><a class="arrow-link" href={orcid} rel="noopener" target="_blank">{a.vitaLink}</a></p>
+    </div>
+  </section>
+
+  <section class="section band-sunk" aria-labelledby="pubs-heading">
+    <div class="shell">
+      <div class="section-head">
+        <h2 id="pubs-heading">{a.pubsHeadline}</h2>
+        <p class="lede">{a.pubsIntro}</p>
+      </div>
+      <ul class="pubs">
+        {a.pubs.map((p) => (
+          <li>
+            <span class="pub-year">{p.year}</span>
+            <div>
+              <p class="pub-authors">{p.authors}</p>
+              <p class="pub-title">{p.titleText}</p>
+              <p class="pub-venue">
+                {p.venue}
+                {p.href && <> · <a href={p.href} rel="noopener" target="_blank">DOI ↗</a></>}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="vita"><a class="arrow-link" href={orcid} rel="noopener" target="_blank">{a.pubsLink}</a></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="why-heading">
+    <div class="shell why-grid">
+      <div>
+        <h2 id="why-heading">{a.whyHeadline}</h2>
+        <div class="story prose">
+          {a.whyBody.map((p) => <p>{p}</p>)}
+        </div>
+      </div>
+      <aside class="pull">
+        <p class="pull-quote">{a.whyPull}</p>
+        <h3 class="curiosity-heading">{a.curiosityHeadline}</h3>
+        <p class="curiosity">{a.curiosityBody}</p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section band-sunk" aria-labelledby="art-heading">
+    <div class="shell">
+      <div class="section-head">
+        <h2 id="art-heading">{a.artHeadline}</h2>
+        {a.artBody.map((p) => <p class="lede">{p}</p>)}
+      </div>
+      <p class="art-pull">{a.artPull}</p>
+      <ul class="gallery">
+        {a.artWorks.map((work, i) => (
+          <li>
+            <figure>
+              <Image src={artImages[i]} alt={`${work.title} — ${a.artCaptionSuffix}`} widths={[320, 520, 760]} sizes="(min-width: 62rem) 20rem, (min-width: 36rem) 45vw, 90vw" loading="lazy" />
+              <figcaption>{work.title} · {a.artCaptionSuffix}</figcaption>
+            </figure>
+          </li>
+        ))}
+      </ul>
+      <p class="vita">
+        <a class="arrow-link" href={a.artNoteHref} rel="noopener" target="_blank">{a.artNote}</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="neuro9-heading">
+    <div class="shell">
+      <article class="card neuro9">
+        <h2 id="neuro9-heading">{a.neuro9Headline}</h2>
+        <p>{a.neuro9Body}</p>
+        <a class="btn btn-secondary" href={a.neuro9Href} rel="noopener" target="_blank">{a.neuro9Cta}</a>
+      </article>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro { display: grid; gap: var(--space-l); align-items: start; }
+  @media (min-width: 62rem) {
+    .intro { grid-template-columns: 24rem minmax(0, 1fr); gap: var(--space-2xl); }
+  }
+  .portrait { margin: 0; }
+  .portrait :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: center 20%;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--rule);
+  }
+
+  .meta { display: grid; gap: 0; margin: 0 0 var(--space-l); border-top: 1px solid var(--rule); }
+  .meta > div {
+    display: grid;
+    grid-template-columns: 8rem minmax(0, 1fr);
+    gap: var(--space-s);
+    padding-block: 0.6rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .meta dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding-block-start: 0.2em;
+  }
+  .meta dd { margin: 0; font-size: var(--step--1); }
+
+  .para { margin-block-start: var(--space-s); color: var(--ink-soft); max-width: 60ch; }
+
+  .story { max-width: 62ch; margin-block-start: var(--space-m); }
+  .story p { color: var(--ink-soft); }
+
+  .timeline { list-style: none; padding: 0; margin-block-start: var(--space-l); border-top: 1px solid var(--rule); }
+  .timeline li {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-m);
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (min-width: 48rem) {
+    .timeline li { grid-template-columns: 9rem minmax(0, 1fr); gap: var(--space-l); }
+  }
+  .period {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    padding-block-start: 0.35em;
+  }
+  .timeline h3 { font-size: var(--step-1); }
+  .entry-body { margin-block-start: var(--space-2xs); color: var(--ink-soft); font-size: var(--step--1); line-height: 1.65; max-width: 62ch; }
+
+  .vita { margin-block-start: var(--space-l); }
+
+  .section-head { max-width: 48rem; margin-block-end: var(--space-l); }
+  .section-head .lede { margin-block-start: var(--space-s); }
+
+  .pubs { list-style: none; padding: 0; border-top: 1px solid var(--rule); }
+  .pubs li {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-m);
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (min-width: 48rem) {
+    .pubs li { grid-template-columns: 5rem minmax(0, 1fr); gap: var(--space-l); }
+  }
+  .pub-year {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--ink-faint);
+    padding-block-start: 0.2em;
+  }
+  .pub-authors { font-size: var(--step--1); color: var(--ink-soft); }
+  .pub-title { font-family: var(--font-display); font-size: var(--step-1); line-height: 1.3; margin-block: 0.15em; }
+  .pub-venue { font-size: var(--step--1); color: var(--ink-faint); }
+
+  .why-grid { display: grid; gap: var(--space-xl); align-items: start; }
+  @media (min-width: 62rem) {
+    .why-grid { grid-template-columns: minmax(0, 1fr) 20rem; gap: var(--space-2xl); }
+  }
+  .pull { border-left: 2px solid var(--accent); padding-inline-start: var(--space-m); }
+  .pull-quote {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: 1.25;
+    font-style: italic;
+  }
+  .curiosity-heading { margin-block-start: var(--space-l); font-size: var(--step-1); }
+  .curiosity { margin-block-start: var(--space-xs); color: var(--ink-soft); font-size: var(--step--1); line-height: 1.65; }
+
+  .art-pull {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-style: italic;
+    color: var(--ink-soft);
+    max-width: 48ch;
+    margin-block-end: var(--space-l);
+  }
+
+  .gallery {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  }
+  .gallery figure { margin: 0; }
+  .gallery :global(img) {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    padding: var(--space-xs);
+  }
+  figcaption {
+    margin-block-start: var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .neuro9 { max-width: 44rem; }
+  .neuro9 h2 { font-size: var(--step-2); }
+  .neuro9 p { margin-block: var(--space-s) var(--space-m); color: var(--ink-soft); }
+</style>

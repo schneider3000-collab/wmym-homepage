@@ -1,0 +1,120 @@
+---
+import { useContent, route } from '../content';
+import type { Locale, RouteKey } from '../content';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = useContent(locale);
+const year = new Date().getFullYear();
+
+const pages: { key: RouteKey; label: string }[] = [
+  { key: 'offerings', label: c.nav.offerings },
+  { key: 'method', label: c.nav.method },
+  { key: 'research', label: c.nav.research },
+  { key: 'about', label: c.nav.about },
+  { key: 'contact', label: c.nav.contact },
+];
+---
+
+<footer class="site-footer">
+  <div class="shell">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <span class="brand-name">{c.brand.name}<span class="brand-q">?</span></span>
+        <p class="claim">{c.brand.claim}</p>
+        <p class="tagline">{c.footer.tagline}</p>
+      </div>
+
+      <nav aria-labelledby="f-pages">
+        <h2 id="f-pages">{c.footer.navHeadline}</h2>
+        <ul>
+          {pages.map((p) => <li><a href={route(locale, p.key)}>{p.label}</a></li>)}
+        </ul>
+      </nav>
+
+      <div>
+        <h2>{c.footer.contactHeadline}</h2>
+        <ul>
+          <li><a href={`mailto:${c.brand.email}`}>{c.brand.email}</a></li>
+          <li><span class="plain">{c.brand.city}</span></li>
+          {c.footer.social.map((s) => (
+            <li><a href={s.href} rel="me noopener" target="_blank">{s.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h2>{c.footer.scienceHeadline}</h2>
+        <ul>
+          {c.footer.science.map((s) => (
+            <li><a href={s.href} rel="noopener" target="_blank">{s.label}</a></li>
+          ))}
+        </ul>
+      </div>
+
+      <div>
+        <h2>{c.footer.legalHeadline}</h2>
+        <ul>
+          <li><a href={route(locale, 'imprint')}>{c.legal.imprint.headline}</a></li>
+          <li><a href={route(locale, 'privacy')}>{c.legal.privacy.headline}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <p class="copyright">© {year} {c.footer.copyright}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-block-start: auto;
+    background: var(--paper-sunk);
+    border-top: 1px solid var(--rule);
+    padding-block: var(--space-xl) var(--space-l);
+  }
+
+  .footer-grid {
+    display: grid;
+    gap: var(--space-l);
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  }
+  .footer-brand { grid-column: 1 / -1; max-width: 24rem; }
+  @media (min-width: 60rem) {
+    .footer-grid { grid-template-columns: 1.6fr repeat(4, 1fr); }
+    .footer-brand { grid-column: auto; }
+  }
+
+  .brand-name {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    letter-spacing: -0.02em;
+    font-variation-settings: 'SOFT' 30, 'WONK' 1;
+  }
+  .brand-q { color: var(--accent); }
+  .claim { font-family: var(--font-display); font-style: italic; color: var(--ink-soft); }
+  .tagline { margin-block-start: var(--space-s); font-size: var(--step--1); color: var(--ink-soft); }
+
+  h2 {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-block-end: var(--space-xs);
+  }
+
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+  li a, .plain { font-size: var(--step--1); }
+  li a { color: var(--ink); text-decoration-color: var(--rule-strong); }
+  li a:hover { color: var(--accent); }
+  .plain { color: var(--ink-soft); }
+
+  .copyright {
+    margin-block-start: var(--space-xl);
+    padding-block-start: var(--space-s);
+    border-top: 1px solid var(--rule);
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+  }
+</style>

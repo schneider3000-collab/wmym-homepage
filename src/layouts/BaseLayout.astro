@@ -1,0 +1,129 @@
+---
+import { Font } from 'astro:assets';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CopyEditor from '../components/dev/CopyEditor.astro';
+import { useContent, content, route } from '../content';
+import type { Locale, RouteKey } from '../content';
+import '../styles/global.css';
+
+interface Props {
+  locale: Locale;
+  current: RouteKey;
+  title: string;
+  description: string;
+  /** Keep legal pages out of the index without hiding them from visitors. */
+  noindex?: boolean;
+}
+const { locale, current, title, description, noindex = false } = Astro.props;
+const c = useContent(locale);
+
+const canonical = new URL(route(locale, current), Astro.site).href;
+const ogImage = new URL(`${import.meta.env.BASE_URL.replace(/\/$/, '')}/og-default.jpg`, Astro.site).href;
+
+const alternates = (['de', 'en'] as Locale[]).map((l) => ({
+  hreflang: l === 'de' ? 'de-AT' : 'en',
+  href: new URL(route(l, current), Astro.site).href,
+}));
+
+const fullTitle = current === 'home' ? title : `${title} — ${c.brand.name}`;
+
+// Site-wide structured data. Emitted once per page so every entry point is
+// self-describing for search engines and AI crawlers.
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  '@id': `${Astro.site}#person`,
+  name: 'Stefan Marco Schneider',
+  alternateName: 'Stefan M. Schneider',
+  url: new URL(route(locale, 'home'), Astro.site).href,
+  email: `mailto:${c.brand.email}`,
+  jobTitle: locale === 'de'
+    ? 'Feldenkrais-Praktiker und Kognitionswissenschaftler'
+    : 'Feldenkrais practitioner and cognitive scientist',
+  identifier: 'https://orcid.org/0000-0002-0724-8282',
+  address: { '@type': 'PostalAddress', addressLocality: c.brand.city, addressCountry: 'AT' },
+  affiliation: { '@type': 'CollegeOrUniversity', name: 'Universität Wien', url: 'https://www.univie.ac.at/' },
+  knowsAbout: [
+    'Feldenkrais Method', 'Embodied cognition', 'Somatic learning',
+    'Mental imagery', 'Movement science', "Parkinson's disease",
+  ],
+  sameAs: [
+    'https://orcid.org/0000-0002-0724-8282',
+    'https://at.linkedin.com/in/stefan-marco-schneider',
+    'https://www.instagram.com/stef.moves/',
+    'https://www.researchgate.net/profile/Stefan-Marco-Schneider-2',
+    'https://www.feldenkrais.at/author/schneider',
+  ],
+};
+
+const businessLd = {
+  '@context': 'https://schema.org',
+  '@type': 'HealthAndBeautyBusiness',
+  '@id': `${Astro.site}#practice`,
+  name: c.brand.name,
+  slogan: c.brand.claim,
+  description: c.home.description,
+  url: new URL(route(locale, 'home'), Astro.site).href,
+  email: `mailto:${c.brand.email}`,
+  founder: { '@id': `${Astro.site}#person` },
+  areaServed: [{ '@type': 'City', name: c.brand.city }, { '@type': 'VirtualLocation', name: 'Online' }],
+  address: { '@type': 'PostalAddress', addressLocality: c.brand.city, addressCountry: 'AT' },
+  availableLanguage: ['de', 'en'],
+  makesOffer: c.programmes.map((p) => ({
+    '@type': 'Offer',
+    name: `${p.name} — ${p.tagline}`,
+    description: p.body,
+    priceCurrency: 'EUR',
+    availability: 'https://schema.org/InStock',
+    url: new URL(`${content[locale].routes.offerings}#${p.id}`, Astro.site).href,
+  })),
+};
+---
+
+<!doctype html>
+<html lang={c.htmlLang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    {alternates.map((a) => <link rel="alternate" hreflang={a.hreflang} href={a.href} />)}
+    <link rel="alternate" hreflang="x-default" href={new URL(route('de', current), Astro.site).href} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={c.brand.name} />
+    <meta property="og:locale" content={locale === 'de' ? 'de_AT' : 'en_GB'} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <meta name="theme-color" content="#f6f3ec" />
+    <link rel="icon" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/favicon.svg`} type="image/svg+xml" />
+    <link rel="sitemap" href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/sitemap-index.xml`} />
+
+    {/* Preload only the upright Latin faces; italic and latin-ext load on demand
+        via unicode-range, so preloading them would just cost bandwidth. */}
+    <Font cssVariable="--font-display" preload={[{ subset: 'latin', style: 'normal' }]} />
+    <Font cssVariable="--font-body" preload={[{ subset: 'latin', style: 'normal' }]} />
+    <Font cssVariable="--font-mono" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(personLd)} is:inline />
+    <script type="application/ld+json" set:html={JSON.stringify(businessLd)} is:inline />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">{c.nav.skipToContent}</a>
+    <Header locale={locale} current={current} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+    {import.meta.env.DEV && <CopyEditor locale={locale} current={current} />}
+  </body>
+</html>

@@ -1,0 +1,14 @@
+# whatmakesyoumove.org
+# Crawling and quoting is explicitly welcome, including by AI search systems.
+# The FAQ blocks on each page carry FAQPage structured data for exactly that purpose.
+
+User-agent: *
+Allow: /
+
+# Legal boilerplate is excluded from the sitemap; no need to index it either.
+Disallow: /impressum
+Disallow: /datenschutz
+Disallow: /en/imprint
+Disallow: /en/privacy
+
+Sitemap: https://whatmakesyoumove.org/sitemap-index.xml

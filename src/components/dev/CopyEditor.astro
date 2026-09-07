@@ -1,0 +1,261 @@
+---
+// Dev-only in-place copy editing. Rendered only when import.meta.env.DEV, so it never
+// reaches a build. Strings are matched to their key path by value rather than by
+// tagging every element, which keeps the views free of editor-specific markup.
+import type { Locale, RouteKey } from '../../content';
+import { useContent } from '../../content';
+
+interface Props { locale: Locale; current: RouteKey }
+const { locale, current } = Astro.props;
+
+// Only the sections this page renders. Without this, a word like "Kontakt" matches
+// keys on pages that are not even open, and every one of them has to be skipped.
+const PAGE_SECTIONS: Record<RouteKey, string[]> = {
+  home: ['home', 'programmes'],
+  offerings: ['offerings', 'programmes'],
+  method: ['method'],
+  research: ['research'],
+  about: ['about'],
+  contact: ['contact'],
+  imprint: ['legal'],
+  privacy: ['legal'],
+};
+const ALWAYS = ['nav', 'brand', 'footer', 'common'];
+const allowed = new Set([...PAGE_SECTIONS[current], ...ALWAYS]);
+
+// Not copy: URLs, route paths and locale plumbing would only create false matches.
+const SKIP_PREFIX = ['routes.'];
+const SKIP_LEAF = ['href', 'linkTo', 'anchor', 'id', 'locale', 'htmlLang', 'otherLocale'];
+
+function flatten(value: unknown, prefix = '', out: Record<string, string> = {}) {
+  if (typeof value === 'string') {
+    const leaf = prefix.split('.').pop() ?? '';
+    if (!SKIP_PREFIX.some((p) => prefix.startsWith(p)) && !SKIP_LEAF.includes(leaf)) {
+      out[prefix] = value;
+    }
+  } else if (Array.isArray(value)) {
+    value.forEach((item, i) => flatten(item, `${prefix}.${i}`, out));
+  } else if (value && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      flatten(child, prefix ? `${prefix}.${key}` : key, out);
+    }
+  }
+  return out;
+}
+
+const all = flatten(useContent(locale));
+const copyMap = Object.fromEntries(
+  Object.entries(all).filter(([key]) => allowed.has(key.split('.')[0])),
+);
+---
+
+<div id="copy-editor-bar" data-copy-skip>
+  <button type="button" id="copy-editor-toggle" aria-pressed="false">
+    <span class="dot"></span><span class="label">Edit copy</span>
+  </button>
+  <span class="count" id="copy-editor-count"></span>
+</div>
+
+<script is:inline define:vars={{ copyMap, locale }}>
+  const byValue = new Map();
+  for (const [path, value] of Object.entries(copyMap)) {
+    const key = value.trim();
+    if (!key) continue;
+    if (!byValue.has(key)) byValue.set(key, []);
+    byValue.get(key).push(path);
+  }
+
+  const bar = document.getElementById('copy-editor-bar');
+  const toggle = document.getElementById('copy-editor-toggle');
+  const countEl = document.getElementById('copy-editor-count');
+  let targets = [];
+  let active = false;
+
+  // Nav labels and page headings often share a word. Where the element sits already
+  // says which one it is.
+  function resolve(el, paths) {
+    if (paths.length === 1) return paths[0];
+    let scoped;
+    if (el.closest('header')) {
+      scoped = paths.filter((p) => p.startsWith('nav.') || p.startsWith('brand.'));
+    } else if (el.closest('footer')) {
+      scoped = paths.filter((p) => p.startsWith('footer.') || p.startsWith('brand.'));
+    } else {
+      scoped = paths.filter((p) => !p.startsWith('nav.') && !p.startsWith('footer.'));
+    }
+    return scoped.length === 1 ? scoped[0] : null;
+  }
+
+  function scan() {
+    targets = [];
+    const ambiguous = new Set();
+    for (const el of document.querySelectorAll('main *, header *, footer *')) {
+      // Only pure text leaves: anything with child elements has markup we would lose.
+      if (el.firstElementChild) continue;
+      if (el.closest('[data-copy-skip]')) continue;
+      const text = el.textContent.trim();
+      if (!text) continue;
+      const paths = byValue.get(text);
+      if (!paths) continue;
+      const path = resolve(el, paths);
+      if (!path) {
+        ambiguous.add(text);
+        continue;
+      }
+      el.dataset.copyPath = path;
+      el.title = path;
+      targets.push(el);
+    }
+    countEl.textContent = `${targets.length} editable`;
+    if (ambiguous.size) {
+      console.info(
+        `[copy-editor] ${ambiguous.size} string(s) skipped — the same text is used at more ` +
+          `than one key, so a click cannot say which to change:`,
+        [...ambiguous],
+      );
+    }
+  }
+
+  function setActive(on) {
+    active = on;
+    document.body.classList.toggle('copy-edit-on', on);
+    toggle.setAttribute('aria-pressed', String(on));
+    toggle.querySelector('.label').textContent = on ? 'Editing copy' : 'Edit copy';
+    for (const el of targets) {
+      if (on) {
+        el.setAttribute('contenteditable', 'plaintext-only');
+        el.spellcheck = false;
+      } else {
+        el.removeAttribute('contenteditable');
+      }
+    }
+    sessionStorage.setItem('wmym-copy-edit', on ? '1' : '0');
+  }
+
+  async function save(el) {
+    const path = el.dataset.copyPath;
+    const value = el.textContent.replace(/\s+/g, ' ').trim();
+    if (!path || value === copyMap[path]) return;
+    if (!value) {
+      el.textContent = copyMap[path];
+      return;
+    }
+
+    el.dataset.copyState = 'saving';
+    try {
+      const res = await fetch('/__copy', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ locale, path, value }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error ?? res.statusText);
+      copyMap[path] = value;
+      el.dataset.copyState = 'saved';
+    } catch (error) {
+      el.dataset.copyState = 'error';
+      el.textContent = copyMap[path];
+      console.error(`[copy-editor] could not save ${path}:`, error.message);
+    }
+    setTimeout(() => delete el.dataset.copyState, 1600);
+  }
+
+  toggle.addEventListener('click', () => setActive(!active));
+
+  document.addEventListener(
+    'blur',
+    (event) => {
+      if (active && event.target instanceof HTMLElement && event.target.dataset.copyPath) {
+        save(event.target);
+      }
+    },
+    true,
+  );
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'e' && event.ctrlKey && event.shiftKey) {
+      event.preventDefault();
+      setActive(!active);
+      return;
+    }
+    const el = event.target;
+    if (!active || !(el instanceof HTMLElement) || !el.dataset.copyPath) return;
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      el.blur();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      el.textContent = copyMap[el.dataset.copyPath];
+      el.blur();
+    }
+  });
+
+  // Let links stay clickable for navigation, but not when the link itself is the
+  // text being edited.
+  document.addEventListener(
+    'click',
+    (event) => {
+      if (!active) return;
+      const link = event.target instanceof Element ? event.target.closest('a') : null;
+      if (link && link.isContentEditable) event.preventDefault();
+    },
+    true,
+  );
+
+  scan();
+  if (sessionStorage.getItem('wmym-copy-edit') === '1') setActive(true);
+</script>
+
+<!-- is:inline keeps this out of the CSS bundle: unrendered is:global styles are
+     still collected at build time, which leaked the editor CSS into production. -->
+<style is:inline>
+  #copy-editor-bar {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font: 500 0.78rem/1 var(--font-mono, monospace);
+  }
+  #copy-editor-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.85rem;
+    background: #191815;
+    color: #f6f3ec;
+    border: none;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.25);
+  }
+  #copy-editor-toggle .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #6d7f78;
+  }
+  #copy-editor-toggle[aria-pressed='true'] .dot { background: #6ee7a5; }
+  #copy-editor-count {
+    padding: 0.4rem 0.6rem;
+    border-radius: 999px;
+    background: #f6f3ec;
+    border: 1px solid #ddd6c6;
+    color: #57534a;
+  }
+
+  body.copy-edit-on [data-copy-path] {
+    outline: 1px dashed rgb(31 74 74 / 0.45);
+    outline-offset: 3px;
+    border-radius: 2px;
+    cursor: text;
+  }
+  body.copy-edit-on [data-copy-path]:hover { outline-color: rgb(31 74 74 / 0.9); }
+  body.copy-edit-on [data-copy-path]:focus {
+    outline: 2px solid #1f4a4a;
+    background: rgb(255 255 255 / 0.6);
+  }
+  [data-copy-state='saving'] { outline-color: #7a5c28 !important; }
+  [data-copy-state='saved'] { outline: 2px solid #2f7d55 !important; }
+  [data-copy-state='error'] { outline: 2px solid #a2331f !important; }
+</style>

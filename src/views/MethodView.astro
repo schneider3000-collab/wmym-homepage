@@ -1,0 +1,163 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import Faq from '../components/Faq.astro';
+import { useContent, route } from '../content';
+import type { Locale } from '../content';
+import ink from '../assets/images/malerei-017.jpg';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = useContent(locale);
+const m = c.method;
+---
+
+<BaseLayout locale={locale} current="method" title={m.title} description={m.description}>
+  <PageHero eyebrow={m.eyebrow} headline={m.headline} lede={m.lede} />
+
+  <section class="section" aria-labelledby="principle-heading">
+    <div class="shell sections">
+      <h2 id="principle-heading" class="visually-hidden">{m.sections[0].title}</h2>
+      {m.sections.map((s) => (
+        <article class="explain">
+          <h3>{s.title}</h3>
+          <div class="explain-body">
+            {s.body.map((para) => <p>{para}</p>)}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="section band-sunk" aria-labelledby="forms-heading">
+    <div class="shell">
+      <h2 id="forms-heading">{m.formsHeadline}</h2>
+      <div class="grid grid-2 forms">
+        {m.forms.map((f) => (
+          <article class="card form">
+            <p class="form-abbr">{f.abbr}</p>
+            <h3>{f.name}</h3>
+            <p class="form-body">{f.body}</p>
+            <p class="form-status">{f.status}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="forwhom-heading">
+    <div class="shell split">
+      <div>
+        <h2 id="forwhom-heading">{m.forWhomHeadline}</h2>
+        <p class="lede">{m.forWhomBody}</p>
+        <ul class="checklist">
+          {m.forWhomList.map((item) => <li>{item}</li>)}
+        </ul>
+        <a class="arrow-link" href={route(locale, 'offerings')}>{c.common.allOfferings}</a>
+      </div>
+      <figure class="ink-figure">
+        <Image src={ink} alt="" widths={[400, 620]} sizes="(min-width: 62rem) 22rem, 80vw" loading="lazy" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="section band-sunk" aria-labelledby="glossary-heading">
+    <div class="shell">
+      <div class="section-head">
+        <h2 id="glossary-heading">{m.glossaryHeadline}</h2>
+        <p class="lede">{m.glossaryIntro}</p>
+      </div>
+      <dl class="glossary">
+        {m.glossary.map((g) => (
+          <div class="glossary-item">
+            <dt>{g.term}</dt>
+            <dd>{g.def}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <Faq headline={m.faqHeadline} intro={c.common.faqIntro} items={m.faq} id="faq-methode" />
+</BaseLayout>
+
+<style>
+  .sections { display: grid; gap: var(--space-xl); }
+  @media (min-width: 62rem) {
+    .explain { display: grid; grid-template-columns: 16rem minmax(0, 1fr); gap: var(--space-xl); align-items: start; }
+  }
+  .explain h3 { font-size: var(--step-2); text-wrap: balance; }
+  .explain-body { max-width: 62ch; }
+  .explain-body p + p { margin-block-start: var(--space-s); }
+  .explain-body p { color: var(--ink-soft); }
+  .explain + .explain { padding-block-start: var(--space-xl); border-top: 1px solid var(--rule); }
+
+  .forms { margin-block-start: var(--space-l); }
+  .form-abbr {
+    font-family: var(--font-mono);
+    font-size: var(--step-1);
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  .form h3 { margin-block: var(--space-2xs) var(--space-s); }
+  .form-body { color: var(--ink-soft); font-size: var(--step--1); line-height: 1.65; }
+  .form-status {
+    margin-block-start: var(--space-m);
+    padding-block-start: var(--space-s);
+    border-top: 1px solid var(--rule);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--ink-faint);
+  }
+
+  .split { display: grid; gap: var(--space-l); align-items: center; }
+  @media (min-width: 62rem) {
+    .split { grid-template-columns: minmax(0, 1fr) 22rem; gap: var(--space-2xl); }
+  }
+  .split .lede { margin-block-start: var(--space-s); }
+
+  .checklist { list-style: none; padding: 0; margin-block: var(--space-m); display: grid; gap: 0.6rem; }
+  .checklist li {
+    position: relative;
+    padding-inline-start: 1.6rem;
+    color: var(--ink-soft);
+    font-size: var(--step--1);
+  }
+  .checklist li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0.62em;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+
+  .ink-figure { margin: 0; }
+  .ink-figure :global(img) {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--rule);
+    background: var(--paper-raised);
+  }
+
+  .section-head { max-width: 46rem; margin-block-end: var(--space-l); }
+  .section-head .lede { margin-block-start: var(--space-s); }
+
+  .glossary { display: grid; gap: 0; margin: 0; border-top: 1px solid var(--rule); }
+  .glossary-item {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block: var(--space-s);
+    border-bottom: 1px solid var(--rule);
+  }
+  @media (min-width: 48rem) {
+    .glossary-item { grid-template-columns: 14rem minmax(0, 1fr); gap: var(--space-m); }
+  }
+  .glossary dt { font-weight: 500; }
+  .glossary dd { margin: 0; color: var(--ink-soft); font-size: var(--step--1); max-width: 62ch; }
+</style>

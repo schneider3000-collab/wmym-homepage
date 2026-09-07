@@ -1,0 +1,57 @@
+---
+// Placeholder glyphs for the three programme lines. The concept comes from Stefan's
+// own notes: each programme gets a little figure, with the headstand (his existing
+// drawing) standing for ACTIVE. These are stand-ins meant to be swapped for his
+// brush drawings once they exist.
+interface Props {
+  id: 'deep' | 'balance' | 'active';
+  size?: number;
+  class?: string;
+}
+const { id, size = 48, class: className = '' } = Astro.props;
+---
+
+<svg
+  class={`mark mark-${id} ${className}`}
+  width={size}
+  height={size}
+  viewBox="0 0 48 48"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="3"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+  focusable="false"
+>
+  {id === 'deep' && (
+    <>
+      <circle cx="9" cy="31" r="4.5" />
+      <path d="M14 32 L28 32" />
+      <path d="M28 32 L33.5 22 L39.5 31.5" />
+      <path d="M18.5 32 L23 25.5" />
+      <path d="M5 41 H43" stroke-width="2" opacity="0.35" />
+    </>
+  )}
+  {id === 'balance' && (
+    <>
+      <circle cx="24" cy="9.5" r="4.5" />
+      <path d="M24 14.5 L24 28" />
+      <path d="M13 21 L24 17.5 L35 21" />
+      <path d="M24 28 L21.5 40" />
+      <path d="M24 28 L32 33.5" />
+      <path d="M15 41.5 H33" stroke-width="2" opacity="0.35" />
+    </>
+  )}
+  {id === 'active' && (
+    <>
+      <circle cx="24" cy="37.5" r="4.5" />
+      <path d="M24 33 L24 19" />
+      <path d="M24 30.5 L15 37.5" />
+      <path d="M24 30.5 L33 37.5" />
+      <path d="M24 19 L18.5 7" />
+      <path d="M24 19 L30.5 8.5" />
+      <path d="M8 42.5 H40" stroke-width="2" opacity="0.35" />
+    </>
+  )}
+</svg>

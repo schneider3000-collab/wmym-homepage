@@ -1,0 +1,253 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { useContent } from '../content';
+import type { Locale } from '../content';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = useContent(locale);
+const k = c.contact;
+const f = k.form;
+---
+
+<BaseLayout locale={locale} current="contact" title={k.title} description={k.description}>
+  <PageHero eyebrow={k.eyebrow} headline={k.headline} lede={k.lede} />
+
+  <section class="section">
+    <div class="shell contact-grid">
+      <!-- Nothing is posted anywhere: the submit handler assembles a mailto: URL in the
+           browser and hands off to the visitor's own mail client. That is what lets the
+           privacy page honestly claim the site stores no data. -->
+      <form class="contact-form" id="contact-form" data-email={c.brand.email} data-subject={f.subjectPrefix} novalidate>
+        <fieldset>
+          <legend>{f.legendAbout}</legend>
+          <div class="field">
+            <label for="topic">{f.topic}</label>
+            <select id="topic" name="topic">
+              {f.topics.map((t) => <option value={t}>{t}</option>)}
+            </select>
+          </div>
+          <div class="field">
+            <label for="message">{f.message} <span class="req">({f.required})</span></label>
+            <textarea id="message" name="message" rows="6" required placeholder={f.messagePlaceholder}></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>{f.legendYou}</legend>
+          <div class="field-row">
+            <div class="field">
+              <label for="name">{f.name} <span class="req">({f.required})</span></label>
+              <input type="text" id="name" name="name" autocomplete="name" required />
+            </div>
+            <div class="field">
+              <label for="email">{f.email} <span class="req">({f.required})</span></label>
+              <input type="email" id="email" name="email" autocomplete="email" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="phone">{f.phone}</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel" />
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>{f.preferredTime}</legend>
+          <div class="chips">
+            {f.days.map((d) => (
+              <label class="chip">
+                <input type="checkbox" name="day" value={d} />
+                <span>{d}</span>
+              </label>
+            ))}
+          </div>
+          <div class="chips">
+            {f.times.map((t) => (
+              <label class="chip">
+                <input type="checkbox" name="time" value={t} />
+                <span>{t}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <label class="consent">
+          <input type="checkbox" id="consent" name="consent" required />
+          <span>{f.consent}</span>
+        </label>
+
+        <button class="btn btn-primary" type="submit">{f.submit}</button>
+        <p class="hint">{f.hint}</p>
+        <p class="hint">
+          {f.fallbackLabel} <a href={`mailto:${c.brand.email}`}>{c.brand.email}</a>
+        </p>
+      </form>
+
+      <aside class="contact-aside">
+        <div class="aside-block">
+          <h2>{k.directHeadline}</h2>
+          <p><a href={`mailto:${c.brand.email}`}>{c.brand.email}</a></p>
+          <p class="muted">{k.directNote}</p>
+        </div>
+
+        <div class="aside-block">
+          <h2>{k.channelsHeadline}</h2>
+          <ul>
+            {k.channels.map((ch) => (
+              <li><a href={ch.href} rel="me noopener" target="_blank">{ch.label}</a></li>
+            ))}
+          </ul>
+        </div>
+
+        <p class="personal">{k.personalNote}</p>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  (() => {
+    const form = document.getElementById('contact-form');
+    if (!(form instanceof HTMLFormElement)) return;
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      if (!form.reportValidity()) return;
+
+      const data = new FormData(form);
+      const val = (key) => String(data.get(key) ?? '').trim();
+      const many = (key) => data.getAll(key).map(String).join(', ');
+
+      const lines = [
+        val('message'),
+        '',
+        '—',
+        `${form.dataset.subject}`,
+        `Name: ${val('name')}`,
+        `E-Mail: ${val('email')}`,
+      ];
+      if (val('phone')) lines.push(`Telefon: ${val('phone')}`);
+      if (many('day') || many('time')) {
+        lines.push(`Wunschzeit: ${[many('day'), many('time')].filter(Boolean).join(' — ')}`);
+      }
+
+      const subject = `${form.dataset.subject}: ${val('topic')}`;
+      window.location.href =
+        `mailto:${form.dataset.email}` +
+        `?subject=${encodeURIComponent(subject)}` +
+        `&body=${encodeURIComponent(lines.join('\n'))}`;
+    });
+  })();
+</script>
+
+<style>
+  .contact-grid { display: grid; gap: var(--space-xl); align-items: start; }
+  @media (min-width: 62rem) {
+    .contact-grid { grid-template-columns: minmax(0, 1fr) 19rem; gap: var(--space-2xl); }
+  }
+
+  .contact-form { max-width: 38rem; }
+  fieldset { border: none; padding: 0; margin: 0 0 var(--space-l); }
+  legend {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding: 0;
+    margin-block-end: var(--space-s);
+  }
+
+  .field { display: grid; gap: 0.35rem; margin-block-end: var(--space-s); }
+  .field-row { display: grid; gap: var(--space-s); }
+  @media (min-width: 34rem) { .field-row { grid-template-columns: 1fr 1fr; } }
+
+  label { font-size: var(--step--1); font-weight: 500; }
+  .req { color: var(--ink-faint); font-weight: 400; }
+
+  input[type='text'], input[type='email'], input[type='tel'], select, textarea {
+    width: 100%;
+    min-height: 3rem;
+    padding: 0.7rem 0.85rem;
+    background: var(--paper-raised);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    font-size: var(--step-0);
+  }
+  textarea { min-height: 9rem; resize: vertical; line-height: 1.6; }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { border-color: var(--accent); }
+  ::placeholder { color: var(--ink-faint); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-block-end: var(--space-s); }
+  .chip { position: relative; }
+  .chip input {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    margin: 0;
+  }
+  .chip span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 3.25rem;
+    min-height: 2.75rem;
+    padding: 0 0.9rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    background: var(--paper-raised);
+    font-size: var(--step--1);
+    font-weight: 400;
+  }
+  .chip input:checked + span {
+    background: var(--accent-wash);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .chip input:focus-visible + span { box-shadow: var(--ring); }
+
+  .consent {
+    display: flex;
+    gap: 0.7rem;
+    align-items: start;
+    margin-block-end: var(--space-m);
+    font-weight: 400;
+    color: var(--ink-soft);
+    line-height: 1.5;
+  }
+  .consent input { width: 1.25rem; height: 1.25rem; margin-block-start: 0.15rem; flex: none; accent-color: var(--accent); }
+
+  .hint {
+    margin-block-start: var(--space-s);
+    font-size: var(--step--1);
+    color: var(--ink-faint);
+    line-height: 1.55;
+    max-width: 46ch;
+  }
+
+  .contact-aside { display: grid; gap: var(--space-l); }
+  .aside-block h2 {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-block-end: var(--space-xs);
+  }
+  .aside-block ul { list-style: none; padding: 0; display: grid; gap: 0.4rem; }
+  .aside-block li a, .aside-block p { font-size: var(--step--1); }
+  .muted { color: var(--ink-soft); margin-block-start: 0.35rem; }
+  .personal {
+    padding-block-start: var(--space-m);
+    border-top: 1px solid var(--rule);
+    font-size: var(--step--1);
+    color: var(--ink-soft);
+    line-height: 1.65;
+  }
+</style>

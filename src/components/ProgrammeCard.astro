@@ -1,0 +1,121 @@
+---
+import ProgrammeMark from './ProgrammeMark.astro';
+import type { Programme } from '../content/types';
+
+interface Props {
+  programme: Programme;
+  /** `full` adds format, price and call to action; `brief` is the homepage teaser. */
+  variant?: 'brief' | 'full';
+  href?: string;
+  labels: { status: string; price: string; format: string; forWhom: string };
+}
+const { programme: p, variant = 'brief', href, labels } = Astro.props;
+---
+
+<article class={`prog prog-${p.id}`} id={variant === 'full' ? p.id : undefined}>
+  <div class="prog-head">
+    <ProgrammeMark id={p.id as 'deep' | 'balance' | 'active'} size={variant === 'full' ? 56 : 44} />
+    <div>
+      <h3 class="prog-name">{p.name}</h3>
+      <p class="prog-tagline">{p.tagline}</p>
+    </div>
+  </div>
+
+  <p class="prog-forwhom">{p.forWhom}</p>
+  <p class="prog-body">{p.body}</p>
+
+  {variant === 'full' && (
+    <dl class="prog-meta">
+      <div><dt>{labels.format}</dt><dd>{p.format}</dd></div>
+      <div><dt>{labels.price}</dt><dd>{p.price}</dd></div>
+      <div><dt>{labels.status}</dt><dd><span class="pill">{p.status}</span></dd></div>
+    </dl>
+  )}
+
+  {variant === 'full' && <p class="prog-crossref">{p.crossref}</p>}
+
+  {href && (
+    <a class={variant === 'full' ? 'btn btn-primary' : 'arrow-link'} href={href}>
+      {variant === 'full' ? p.cta : p.tagline}
+    </a>
+  )}
+</article>
+
+<style>
+  .prog {
+    --prog: var(--accent);
+    --prog-wash: var(--accent-wash);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-s);
+    padding: var(--space-m);
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-top: 3px solid var(--prog);
+    border-radius: var(--radius-lg);
+    scroll-margin-top: 6rem;
+  }
+  .prog-deep { --prog: var(--deep); --prog-wash: var(--deep-wash); }
+  .prog-balance { --prog: var(--balance); --prog-wash: var(--balance-wash); }
+  .prog-active { --prog: var(--active); --prog-wash: var(--active-wash); }
+
+  .prog-head { display: flex; align-items: center; gap: var(--space-s); }
+  .prog-head :global(.mark) { color: var(--prog); flex: none; }
+
+  .prog-name {
+    font-family: var(--font-mono);
+    font-size: var(--step-0);
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    color: var(--prog);
+  }
+  .prog-tagline {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  .prog-forwhom { font-weight: 500; }
+  .prog-body { color: var(--ink-soft); font-size: var(--step--1); line-height: 1.6; }
+
+  .prog-meta { display: grid; gap: var(--space-xs); margin-block-start: auto; }
+  .prog-meta > div {
+    display: grid;
+    grid-template-columns: 6.5rem 1fr;
+    gap: var(--space-s);
+    padding-block: 0.5rem;
+    border-top: 1px solid var(--rule);
+    font-size: var(--step--1);
+  }
+  dt {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    padding-block-start: 0.15em;
+  }
+  dd { margin: 0; color: var(--ink-soft); }
+
+  .pill {
+    display: inline-block;
+    padding: 0.1em 0.6em;
+    border-radius: 999px;
+    background: var(--prog-wash);
+    color: var(--prog);
+    font-size: 0.78rem;
+    font-weight: 500;
+  }
+
+  .prog-crossref {
+    font-size: var(--step--1);
+    font-style: italic;
+    color: var(--ink-faint);
+    line-height: 1.55;
+  }
+
+  .prog .btn-primary { background: var(--prog); align-self: start; }
+  .prog .btn-primary:hover { background: color-mix(in srgb, var(--prog) 80%, #000); }
+  .prog .arrow-link { color: var(--prog); margin-block-start: auto; }
+</style>

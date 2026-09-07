@@ -1,0 +1,4 @@
+#!/bin/sh
+# Blocks commits where German and English copy fall out of step.
+# Installed by the `prepare` npm script (git config core.hooksPath .githooks).
+exec node scripts/check-i18n-parity.mjs

@@ -1,0 +1,104 @@
+---
+// Renders an FAQ block and emits matching FAQPage structured data. The friend's brief
+// explicitly wants direct answer blocks that AI search systems can quote, which is
+// what the JSON-LD is for.
+interface Props {
+  headline: string;
+  intro?: string;
+  items: { q: string; a: string }[];
+  id?: string;
+}
+const { headline, intro, items, id = 'faq' } = Astro.props;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: items.map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  })),
+};
+---
+
+<section class="section" id={id} aria-labelledby={`${id}-heading`}>
+  <div class="shell faq">
+    <div class="faq-head">
+      <h2 id={`${id}-heading`}>{headline}</h2>
+      {intro && <p class="lede">{intro}</p>}
+    </div>
+    <div class="faq-list">
+      {items.map((item) => (
+        <details class="faq-item">
+          <summary>
+            <span class="faq-q">{item.q}</span>
+            <span class="faq-icon" aria-hidden="true"></span>
+          </summary>
+          <div class="faq-a"><p>{item.a}</p></div>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} is:inline />
+
+<style>
+  .faq {
+    display: grid;
+    gap: var(--space-l);
+    align-items: start;
+  }
+  @media (min-width: 60rem) {
+    .faq { grid-template-columns: minmax(0, 22rem) minmax(0, 1fr); gap: var(--space-xl); }
+    .faq-head { position: sticky; top: var(--space-l); }
+  }
+  .faq-head .lede { margin-block-start: var(--space-s); font-size: var(--step-0); }
+
+  .faq-list { border-top: 1px solid var(--rule); }
+  .faq-item { border-bottom: 1px solid var(--rule); }
+
+  summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-s);
+    padding-block: var(--space-s);
+    min-height: 3rem;
+    cursor: pointer;
+    list-style: none;
+    font-weight: 500;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary:hover .faq-q { color: var(--accent); }
+
+  .faq-q { font-size: var(--step-0); line-height: 1.4; }
+
+  .faq-icon {
+    position: relative;
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin-block-start: 0.35em;
+  }
+  .faq-icon::before,
+  .faq-icon::after {
+    content: '';
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0;
+    width: 100%;
+    height: 1.5px;
+    background: var(--ink-soft);
+    transition: transform 0.2s;
+  }
+  .faq-icon::after { transform: rotate(90deg); }
+  [open] .faq-icon::after { transform: rotate(0deg); }
+
+  .faq-a {
+    padding-block-end: var(--space-m);
+    padding-inline-end: 2rem;
+    max-width: 62ch;
+    color: var(--ink-soft);
+  }
+</style>

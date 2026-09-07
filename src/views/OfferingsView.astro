@@ -1,0 +1,190 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import ProgrammeCard from '../components/ProgrammeCard.astro';
+import Faq from '../components/Faq.astro';
+import { useContent, route } from '../content';
+import type { Locale } from '../content';
+import roomImage from '../assets/images/gruppenraum.jpg';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = useContent(locale);
+const o = c.offerings;
+const labels = { status: c.common.status, price: c.common.price, format: c.common.format, forWhom: c.common.forWhom };
+const contactHref = route(locale, 'contact');
+---
+
+<BaseLayout locale={locale} current="offerings" title={o.title} description={o.description}>
+  <PageHero eyebrow={o.eyebrow} headline={o.headline} lede={o.lede} />
+
+  <section class="section" aria-labelledby="programmes-heading">
+    <div class="shell">
+      <div class="section-head">
+        <h2 id="programmes-heading">{o.programmesHeadline}</h2>
+        <p class="lede">{o.programmesIntro}</p>
+      </div>
+      <div class="grid grid-3">
+        {c.programmes.map((p) => (
+          <ProgrammeCard programme={p} variant="full" labels={labels} href={contactHref} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section band-sunk" id="workshops" aria-labelledby="workshops-heading">
+    <div class="shell split">
+      <div>
+        <p class="eyebrow">{c.home.tiles[0].eyebrow}</p>
+        <h2 id="workshops-heading">{o.workshopsHeadline}</h2>
+        <p class="lede">{o.workshopsLede}</p>
+        <p class="body">{o.workshopsBody}</p>
+        <p class="price-line">{o.workshopsPrice}</p>
+        <a class="btn btn-primary" href={contactHref}>{o.workshopsCta}</a>
+      </div>
+      <figure class="figure-portrait">
+        <Image src={roomImage} alt={o.workshopsHeadline} widths={[420, 640]} sizes="(min-width: 62rem) 24rem, 85vw" loading="lazy" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="fi" aria-labelledby="fi-heading">
+    <div class="shell">
+      <article class="card paused">
+        <p class="eyebrow paused-flag">{o.fiStatus}</p>
+        <h2 id="fi-heading">{o.fiHeadline}</h2>
+        <p>{o.fiBody}</p>
+        <a class="arrow-link" href={contactHref}>{o.fiCta}</a>
+      </article>
+    </div>
+  </section>
+
+  <section class="section band-ink" aria-labelledby="first-heading">
+    <div class="shell first">
+      <h2 id="first-heading">{o.firstHeadline}</h2>
+      <p>{o.firstBody}</p>
+      <a class="btn btn-first" href={contactHref}>{o.firstCta}</a>
+    </div>
+  </section>
+
+  <section class="section" id="preise" aria-labelledby="prices-heading">
+    <div class="shell">
+      <div class="section-head">
+        <h2 id="prices-heading">{o.pricesHeadline}</h2>
+        <p class="lede">{o.pricesNote}</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">{o.pricesTable.colOffer}</th>
+              <th scope="col">{o.pricesTable.colUnit}</th>
+              <th scope="col" class="num">{o.pricesTable.colPrice}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {o.pricesTable.rows.map((row) => (
+              <tr>
+                <th scope="row">{row.offer}</th>
+                <td>{row.unit}</td>
+                <td class="num">{row.price}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid-2 notes">
+        {o.notes.map((note) => (
+          <article class="note">
+            <h3>{note.title}</h3>
+            <p>{note.body}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="band-sunk">
+    <Faq headline={o.faqHeadline} intro={c.common.faqIntro} items={o.faq} id="faq-preise" />
+  </div>
+</BaseLayout>
+
+<style>
+  .section-head { max-width: 46rem; margin-block-end: var(--space-l); }
+  .section-head .lede { margin-block-start: var(--space-s); }
+
+  .split { display: grid; gap: var(--space-l); align-items: center; }
+  @media (min-width: 62rem) {
+    .split { grid-template-columns: minmax(0, 1fr) 24rem; gap: var(--space-2xl); }
+  }
+  .split h2 { margin-block-start: var(--space-xs); max-width: 18ch; }
+  .split .lede { margin-block-start: var(--space-s); font-size: var(--step-1); }
+  .split .body { margin-block-start: var(--space-s); color: var(--ink-soft); max-width: 58ch; }
+  .split figure { margin: 0; }
+  .split figure :global(img) {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--rule);
+  }
+
+  .price-line {
+    margin-block: var(--space-m);
+    font-family: var(--font-mono);
+    font-size: var(--step-0);
+    color: var(--accent);
+  }
+
+  .paused { max-width: 44rem; border-style: dashed; background: transparent; }
+  .paused h2 { margin-block: var(--space-2xs) var(--space-s); font-size: var(--step-2); }
+  .paused p { color: var(--ink-soft); }
+  .paused .arrow-link { display: inline-flex; margin-block-start: var(--space-m); }
+  .paused-flag { color: var(--balance); }
+
+  .first { max-width: 44rem; }
+  .first p { margin-block: var(--space-m) var(--space-l); color: #d8d4cb; }
+  .btn-first { background: var(--paper); color: var(--paper-ink); }
+
+  .table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: var(--radius-lg); background: var(--paper-raised); }
+  table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+  thead th {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  th, td { text-align: left; padding: 0.85rem 1rem; border-bottom: 1px solid var(--rule); }
+  tbody tr:last-child th, tbody tr:last-child td { border-bottom: none; }
+  tbody th { font-weight: 500; }
+  td { color: var(--ink-soft); }
+  .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  tbody .num { color: var(--ink); font-weight: 500; }
+
+  /* On a phone the three columns squeeze the price — the one thing people came for —
+     off the right edge behind a horizontal scroll. Below 40rem each row becomes a
+     stacked block instead, with the amount on its own line. */
+  @media (max-width: 40rem) {
+    .table-wrap { overflow-x: visible; }
+    table, tbody, tbody tr, tbody th, tbody td { display: block; width: 100%; }
+    thead { display: none; }
+    tbody tr { padding: 0.9rem 1rem; border-bottom: 1px solid var(--rule); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody th, tbody td { padding: 0; border: none; }
+    tbody th { font-size: var(--step-0); }
+    tbody .num {
+      text-align: left;
+      margin-block-start: 0.4rem;
+      font-family: var(--font-mono);
+      color: var(--accent);
+    }
+  }
+
+  .notes { margin-block-start: var(--space-xl); }
+  .note h3 { font-size: var(--step-1); }
+  .note p { margin-block-start: var(--space-xs); color: var(--ink-soft); font-size: var(--step--1); line-height: 1.65; }
+</style>

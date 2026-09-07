@@ -1,0 +1,203 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProgrammeCard from '../components/ProgrammeCard.astro';
+import { useContent, route } from '../content';
+import type { Locale } from '../content';
+import portrait from '../assets/images/portrait-studio.jpg';
+import uniPortrait from '../assets/images/portrait-uni-wien.jpg';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const c = useContent(locale);
+const labels = { status: c.common.status, price: c.common.price, format: c.common.format, forWhom: c.common.forWhom };
+---
+
+<BaseLayout locale={locale} current="home" title={c.home.title} description={c.home.description}>
+  <section class="hero">
+    <div class="shell hero-grid">
+      <div class="hero-text">
+        <p class="eyebrow">{c.home.eyebrow}</p>
+        <h1>{c.home.headline}</h1>
+        <p class="lede">{c.home.lede}</p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href={route(locale, 'contact')}>{c.home.ctaPrimary}</a>
+          <a class="btn btn-secondary" href={route(locale, 'offerings')}>{c.home.ctaSecondary}</a>
+        </div>
+      </div>
+      <figure class="hero-figure figure-portrait">
+        <Image src={portrait} alt={c.home.heroImageAlt} widths={[420, 640, 900]} sizes="(min-width: 62rem) 26rem, 90vw" loading="eager" fetchpriority="high" />
+      </figure>
+    </div>
+  </section>
+
+  <section class="section band-sunk" aria-labelledby="programmes-heading">
+    <div class="shell">
+      <div class="section-head">
+        <p class="eyebrow">{c.home.programmesEyebrow}</p>
+        <h2 id="programmes-heading">{c.home.programmesHeadline}</h2>
+        <p class="lede">{c.home.programmesLede}</p>
+      </div>
+      <div class="grid grid-3 programmes">
+        {c.programmes.map((p) => (
+          <ProgrammeCard programme={p} labels={labels} href={`${route(locale, 'offerings')}#${p.id}`} />
+        ))}
+      </div>
+      <p class="section-cta">
+        <a class="arrow-link" href={route(locale, 'offerings')}>{c.home.programmesCta}</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="tiles-heading">
+    <div class="shell">
+      <h2 id="tiles-heading" class="visually-hidden">{c.home.tilesHeadline}</h2>
+      <div class="grid grid-2">
+        {c.home.tiles.map((tile) => (
+          <article class="card tile">
+            <p class="eyebrow">{tile.eyebrow}</p>
+            <h3>{tile.title}</h3>
+            <p>{tile.body}</p>
+            <a class="arrow-link" href={`${route(locale, tile.linkTo as 'offerings' | 'research')}${tile.anchor}`}>
+              {tile.linkLabel}
+            </a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section band-sunk" aria-labelledby="about-heading">
+    <div class="shell about-grid">
+      <figure class="about-figure figure-portrait">
+        <Image src={uniPortrait} alt={c.home.aboutImageAlt} widths={[380, 560]} sizes="(min-width: 62rem) 22rem, 80vw" loading="lazy" />
+      </figure>
+      <div>
+        <p class="eyebrow">{c.home.aboutEyebrow}</p>
+        <h2 id="about-heading">{c.home.aboutHeadline}</h2>
+        {c.home.aboutBody.map((para) => <p class="about-para">{para}</p>)}
+        <a class="arrow-link" href={route(locale, 'about')}>{c.home.aboutCta}</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-tight" aria-labelledby="trust-heading">
+    <div class="shell">
+      <h2 id="trust-heading" class="eyebrow trust-heading">{c.home.trustHeadline}</h2>
+      <ul class="trust-list">
+        {c.home.trustItems.map((item) => (
+          <li>
+            {item.href
+              ? <a href={item.href} rel="noopener" target="_blank">{item.name}</a>
+              : <span>{item.name}</span>}
+          </li>
+        ))}
+      </ul>
+
+      <dl class="facts">
+        {c.home.facts.map((f) => (
+          <div class="fact">
+            <dt>{f.value}</dt>
+            <dd>{f.label}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </section>
+
+  <section class="section band-ink" aria-labelledby="closing-heading">
+    <div class="shell closing">
+      <h2 id="closing-heading">{c.home.closingHeadline}</h2>
+      <p>{c.home.closingBody}</p>
+      <a class="btn btn-closing" href={route(locale, 'contact')}>{c.home.closingCta}</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero { padding-block: var(--space-2xl) var(--space-xl); }
+  .hero-grid { display: grid; gap: var(--space-xl); align-items: center; }
+  @media (min-width: 62rem) {
+    .hero-grid { grid-template-columns: minmax(0, 1fr) 26rem; gap: var(--space-2xl); }
+  }
+  .hero h1 { margin-block-start: var(--space-s); font-size: var(--step-5); max-width: 12ch; }
+  .hero .lede { margin-block-start: var(--space-m); }
+  .hero .btn-row { margin-block-start: var(--space-l); }
+
+  .hero-figure { margin: 0; }
+  .hero-figure :global(img) {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    /* The source portrait is tall; a fixed ratio keeps the hero from stretching. */
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    object-position: center 22%;
+    border: 1px solid var(--rule);
+  }
+
+  .section-head { max-width: 46rem; margin-block-end: var(--space-l); }
+  .section-head h2 { margin-block-start: var(--space-xs); }
+  .section-head .lede { margin-block-start: var(--space-s); }
+  .section-cta { margin-block-start: var(--space-l); }
+
+  .tile { display: flex; flex-direction: column; gap: var(--space-xs); }
+  .tile h3 { margin-block-start: var(--space-2xs); }
+  .tile p { color: var(--ink-soft); font-size: var(--step--1); line-height: 1.6; }
+  .tile .arrow-link { margin-block-start: auto; padding-block-start: var(--space-s); }
+
+  .about-grid { display: grid; gap: var(--space-l); align-items: center; }
+  @media (min-width: 62rem) {
+    .about-grid { grid-template-columns: 22rem minmax(0, 1fr); gap: var(--space-2xl); }
+  }
+  .about-figure { margin: 0; }
+  .about-figure :global(img) {
+    width: 100%;
+    border-radius: var(--radius-lg);
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border: 1px solid var(--rule);
+  }
+  .about-grid h2 { margin-block-start: var(--space-xs); max-width: 20ch; }
+  .about-para { margin-block-start: var(--space-s); color: var(--ink-soft); max-width: 58ch; }
+  .about-grid .arrow-link { margin-block-start: var(--space-m); }
+
+  .trust-heading { display: block; margin-block-end: var(--space-s); }
+  .trust-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-m);
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-xl);
+    font-size: var(--step--1);
+  }
+  .trust-list li { color: var(--ink-soft); }
+  .trust-list a { color: var(--ink-soft); }
+  .trust-list a:hover { color: var(--accent); }
+
+  .facts {
+    display: grid;
+    gap: var(--space-m);
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    padding-block-start: var(--space-l);
+    border-top: 1px solid var(--rule);
+    margin: 0;
+  }
+  .fact dt {
+    font-family: var(--font-display);
+    font-size: var(--step-3);
+    line-height: 1;
+    color: var(--accent);
+  }
+  .fact dd {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--step--1);
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .closing { max-width: 44rem; }
+  .closing p { margin-block: var(--space-m) var(--space-l); color: #d8d4cb; }
+  .btn-closing { background: var(--paper); color: var(--paper-ink); }
+  .btn-closing:hover { background: #fff; }
+</style>

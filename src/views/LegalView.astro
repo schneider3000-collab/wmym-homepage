@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import { useContent } from '../content';
+import type { Locale, RouteKey } from '../content';
+
+interface Props {
+  locale: Locale;
+  kind: 'imprint' | 'privacy';
+}
+const { locale, kind } = Astro.props;
+const c = useContent(locale);
+const page = c.legal[kind];
+const current: RouteKey = kind;
+---
+
+<BaseLayout locale={locale} current={current} title={page.title} description={page.description} noindex>
+  <PageHero eyebrow={c.footer.legalHeadline} headline={page.headline} lede={page.lede} />
+
+  <section class="section">
+    <div class="shell-narrow">
+      <!-- Visible on purpose: these placeholders must be filled before the site goes
+           live, and a note in a README would be too easy to miss. -->
+      <p class="todo"><strong>Vor dem Launch:</strong> {page.todo}</p>
+
+      <div class="blocks">
+        {page.blocks.map((block) => (
+          <section class="block">
+            <h2>{block.title}</h2>
+            {block.lines.map((line) => <p>{line}</p>)}
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .todo {
+    padding: var(--space-s) var(--space-m);
+    border: 1px dashed var(--balance);
+    border-radius: var(--radius);
+    background: var(--balance-wash);
+    color: var(--balance);
+    font-size: var(--step--1);
+    line-height: 1.6;
+  }
+
+  .blocks { margin-block-start: var(--space-xl); }
+  .block + .block { margin-block-start: var(--space-l); padding-block-start: var(--space-l); border-top: 1px solid var(--rule); }
+  .block h2 { font-size: var(--step-1); margin-block-end: var(--space-s); }
+  .block p { color: var(--ink-soft); max-width: 62ch; }
+  .block p + p { margin-block-start: var(--space-s); }
+</style>
