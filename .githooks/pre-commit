@@ -1,4 +1,6 @@
 #!/bin/sh
-# Blocks commits where German and English copy fall out of step.
+# Blocks commits where German and English copy fall out of step, or where edits
+# pulled from the copy-editor artifact haven't been applied yet.
 # Installed by the `prepare` npm script (git config core.hooksPath .githooks).
-exec node scripts/check-i18n-parity.mjs
+node scripts/check-i18n-parity.mjs || exit 1
+node scripts/check-copy-editor-sync.mjs || exit 1

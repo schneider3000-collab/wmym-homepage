@@ -1,0 +1,380 @@
+<title>WMYM Live Copy Editor</title>
+<style>/*__CSS__*/</style>
+<style>
+  #copy-editor-bar {
+    position: fixed;
+    left: 1rem;
+    bottom: 1rem;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font: 500 0.78rem/1 var(--font-mono, ui-monospace, Menlo, monospace);
+  }
+  #copy-editor-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.85rem;
+    background: #191815;
+    color: #f6f3ec;
+    border: none;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.35);
+    cursor: pointer;
+    font: inherit;
+  }
+  #copy-editor-toggle .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: #6d7f78;
+  }
+  #copy-editor-toggle[aria-pressed='true'] .dot { background: #6ee7a5; }
+  #copy-editor-toggle[disabled] { cursor: not-allowed; opacity: 0.6; }
+  #copy-editor-count {
+    padding: 0.4rem 0.6rem;
+    border-radius: 999px;
+    background: #f6f3ec;
+    border: 1px solid #ddd6c6;
+    color: #57534a;
+  }
+  #copy-editor-pending {
+    display: none;
+    padding: 0.35rem 0.55rem;
+    border-radius: 999px;
+    background: #f3e9d4;
+    border: 1px solid #c9a45f;
+    color: #7a5c28;
+    font-weight: 600;
+  }
+  #copy-editor-pending.show { display: inline-block; }
+
+  #ro-banner {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    background: #f3e9d4;
+    color: #7a5c28;
+    border-bottom: 1px solid #c9a45f;
+    padding: 0.6rem 1rem;
+    font: 500 0.82rem/1.3 var(--font-body, ui-sans-serif, system-ui, sans-serif);
+    text-align: center;
+  }
+  #ro-banner.show { display: flex; }
+
+  body.copy-edit-on [data-copy-path] {
+    outline: 1px dashed rgb(31 74 74 / 0.45);
+    outline-offset: 3px;
+    border-radius: 2px;
+    cursor: text;
+  }
+  body.copy-edit-on [data-copy-path]:hover { outline-color: rgb(31 74 74 / 0.9); }
+  body.copy-edit-on [data-copy-path]:focus {
+    outline: 2px solid #1f4a4a;
+    background: rgb(255 255 255 / 0.6);
+  }
+  [data-copy-path][data-dirty='true'] { outline: 1px solid #c9a45f !important; }
+  [data-copy-state='saving'] { outline-color: #7a5c28 !important; }
+  [data-copy-state='saved'] { outline: 2px solid #2f7d55 !important; }
+  [data-copy-state='error'] { outline: 2px solid #a2331f !important; }
+</style>
+
+<div id="ro-banner" role="status">
+  Read-only here — sign in to the workspace this page belongs to, in a tab on claude.ai, to save edits.
+</div>
+
+<div id="page-slot"></div>
+
+<div id="copy-editor-bar" data-copy-skip>
+  <button type="button" id="copy-editor-toggle" aria-pressed="false">
+    <span class="dot"></span><span class="label">Edit copy</span>
+  </button>
+  <span class="count" id="copy-editor-count"></span>
+  <span id="copy-editor-pending"></span>
+</div>
+
+<script id="content-data" type="application/json">__PAYLOAD_JSON__</script>
+
+<script>
+(function () {
+  var DATA = JSON.parse(document.getElementById('content-data').textContent);
+  var PAGES = {};
+  DATA.pages.forEach(function (p) { PAGES[p.path] = p; });
+  var ORIGINALS = DATA.originals; // { de: {key: value}, en: {key: value} }
+  var ASSETS = DATA.assets; // { "/_astro/x.webp": "data:...", ... }
+
+  var pageSlot = document.getElementById('page-slot');
+  var bar = document.getElementById('copy-editor-bar');
+  var toggle = document.getElementById('copy-editor-toggle');
+  var countEl = document.getElementById('copy-editor-count');
+  var pendingEl = document.getElementById('copy-editor-pending');
+  var roBanner = document.getElementById('ro-banner');
+
+  var db = null;
+  var writable = true;
+  var active = false;
+  var targets = [];
+  var byValue = new Map();
+  var current = null; // { path, locale, routeKey }
+  var pending = new Map(); // "lang__key" -> { lang, key, value, updatedAt, error? }
+
+  function docId(lang, key) { return lang + '__' + key; }
+
+  function resolveAsset(src) {
+    return (src && ASSETS[src]) || src;
+  }
+
+  function computeByValue(copyMap) {
+    var map = new Map();
+    Object.keys(copyMap).forEach(function (key) {
+      var v = copyMap[key].trim();
+      if (!v) return;
+      if (!map.has(v)) map.set(v, []);
+      map.get(v).push(key);
+    });
+    return map;
+  }
+
+  function resolveAmbiguous(el, paths) {
+    if (paths.length === 1) return paths[0];
+    var scoped;
+    if (el.closest('header')) {
+      scoped = paths.filter(function (p) { return p.indexOf('nav.') === 0 || p.indexOf('brand.') === 0; });
+    } else if (el.closest('footer')) {
+      scoped = paths.filter(function (p) { return p.indexOf('footer.') === 0 || p.indexOf('brand.') === 0; });
+    } else {
+      scoped = paths.filter(function (p) { return p.indexOf('nav.') !== 0 && p.indexOf('footer.') !== 0; });
+    }
+    return scoped.length === 1 ? scoped[0] : null;
+  }
+
+  function currentValue(lang, key) {
+    // Read from the queue whether or not it's been synced yet — a synced edit stays
+    // here, still overriding the snapshot's baked-in value, until a republish bakes
+    // it into ORIGINALS and Claude prunes the now-redundant queue entry.
+    var p = pending.get(docId(lang, key));
+    return p ? p.value : ORIGINALS[lang][key];
+  }
+
+  // A queued edit Claude has already merged into de.ts/en.ts (applied: true) is no
+  // longer something to act on — only unsynced edits count toward "pending" and get
+  // the dirty outline.
+  function outstanding(record) { return !!record && !record.applied; }
+
+  function scan() {
+    targets = [];
+    var ambiguous = new Set();
+    pageSlot.querySelectorAll('main *, header *, footer *').forEach(function (el) {
+      if (el.firstElementChild) return;
+      if (el.closest('[data-copy-skip]')) return;
+      var text = el.textContent.trim();
+      if (!text) return;
+      var paths = byValue.get(text);
+      if (!paths) return;
+      var key = resolveAmbiguous(el, paths);
+      if (!key) { ambiguous.add(text); return; }
+      el.dataset.copyPath = key;
+      el.title = key;
+      if (outstanding(pending.get(docId(current.locale, key)))) el.dataset.dirty = 'true';
+      else delete el.dataset.dirty;
+      // A key can appear more than once verbatim on a page (e.g. a repeated CTA
+      // label); render every occurrence from its queued value, not just the first.
+      var value = currentValue(current.locale, key);
+      if (el.textContent.trim() !== value) el.textContent = value;
+      targets.push(el);
+    });
+    countEl.textContent = targets.length + ' editable';
+    if (ambiguous.size) {
+      console.info('[copy-editor] skipped ambiguous strings on this page:', Array.from(ambiguous));
+    }
+    if (active) applyActive(true);
+  }
+
+  function applyActive(on) {
+    active = on;
+    document.body.classList.toggle('copy-edit-on', on);
+    toggle.setAttribute('aria-pressed', String(on));
+    toggle.querySelector('.label').textContent = on ? 'Editing copy' : 'Edit copy';
+    targets.forEach(function (el) {
+      if (on) {
+        el.setAttribute('contenteditable', 'plaintext-only');
+        el.spellcheck = false;
+      } else {
+        el.removeAttribute('contenteditable');
+      }
+    });
+    try { sessionStorage.setItem('wmym-copy-edit', on ? '1' : '0'); } catch (e) {}
+  }
+
+  function updatePendingBadge() {
+    var n = 0;
+    pending.forEach(function (record) { if (outstanding(record)) n++; });
+    pendingEl.textContent = n + ' pending';
+    pendingEl.classList.toggle('show', n > 0);
+  }
+
+  async function save(el) {
+    var key = el.dataset.copyPath;
+    var lang = current.locale;
+    var value = el.textContent.replace(/\s+/g, ' ').trim();
+    var base = ORIGINALS[lang][key];
+    if (value === base) {
+      if (pending.has(docId(lang, key))) {
+        pending.delete(docId(lang, key));
+        if (db && writable) { try { await db.doc('edits/' + docId(lang, key)).delete(); } catch (e) {} }
+      }
+      delete el.dataset.dirty;
+      delete el.dataset.copyState;
+      updatePendingBadge();
+      return;
+    }
+    if (!value) { el.textContent = base; return; }
+
+    var record = { lang: lang, key: key, value: value, baseline: base, updatedAt: new Date().toISOString() };
+    pending.set(docId(lang, key), record);
+    el.dataset.dirty = 'true';
+    updatePendingBadge();
+
+    if (!db || !writable) return;
+    el.dataset.copyState = 'saving';
+    try {
+      await db.doc('edits/' + docId(lang, key)).set(record);
+      el.dataset.copyState = 'saved';
+    } catch (err) {
+      el.dataset.copyState = 'error';
+      console.error('[copy-editor] could not save ' + key + ':', err && err.message);
+    }
+    setTimeout(function () { delete el.dataset.copyState; }, 1400);
+  }
+
+  function showBanner() {
+    roBanner.classList.add('show');
+    document.body.style.paddingTop = roBanner.offsetHeight + 'px';
+  }
+
+  function closeMobileNav() {
+    document.body.classList.remove('nav-open');
+    var t = pageSlot.querySelector('.menu-toggle');
+    if (t) t.setAttribute('aria-expanded', 'false');
+  }
+
+  function renderPage(path) {
+    var page = PAGES[path];
+    if (!page) return false;
+    current = { path: page.path, locale: page.locale, routeKey: page.routeKey };
+    document.title = page.title;
+    pageSlot.innerHTML = page.bodyHtml;
+    pageSlot.querySelectorAll('img[src]').forEach(function (img) {
+      img.src = resolveAsset(img.getAttribute('src'));
+    });
+    document.documentElement.lang = page.locale === 'de' ? 'de-AT' : 'en';
+    byValue = computeByValue(page.copyMap);
+    scan();
+    try { history.replaceState(null, '', '#' + path); } catch (e) {}
+    return true;
+  }
+
+  // ---- mobile menu toggle (the site's own inline script is stripped on capture) ----
+  document.addEventListener('click', function (event) {
+    var t = event.target instanceof Element ? event.target.closest('.menu-toggle') : null;
+    if (!t) return;
+    var open = t.getAttribute('aria-expanded') !== 'true';
+    t.setAttribute('aria-expanded', String(open));
+    document.body.classList.toggle('nav-open', open);
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && document.body.classList.contains('nav-open')) closeMobileNav();
+  });
+
+  // ---- in-artifact navigation + "don't navigate the link you're editing" guard ----
+  document.addEventListener('click', function (event) {
+    var link = event.target instanceof Element ? event.target.closest('a[href]') : null;
+    if (!link) return;
+    if (link.isContentEditable) { event.preventDefault(); return; }
+    if (link.target === '_blank') return;
+    var href = link.getAttribute('href');
+    if (!href || href.charAt(0) === '#') return;
+    var cleanPath = href.split('#')[0].split('?')[0];
+    if (!PAGES[cleanPath]) return;
+    event.preventDefault();
+    renderPage(cleanPath);
+    var hashId = href.indexOf('#') !== -1 ? href.split('#')[1] : null;
+    if (hashId) {
+      requestAnimationFrame(function () {
+        var target = document.getElementById(hashId);
+        if (target) target.scrollIntoView();
+      });
+    } else {
+      window.scrollTo(0, 0);
+    }
+    closeMobileNav();
+  }, true);
+
+  // ---- edit-mode toggle, save-on-blur, keyboard handling ----
+  toggle.addEventListener('click', function () { applyActive(!active); });
+
+  document.addEventListener('blur', function (event) {
+    if (active && event.target instanceof HTMLElement && event.target.dataset.copyPath) save(event.target);
+  }, true);
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'e' && event.ctrlKey && event.shiftKey) {
+      event.preventDefault();
+      applyActive(!active);
+      return;
+    }
+    var el = event.target;
+    if (!active || !(el instanceof HTMLElement) || !el.dataset.copyPath) return;
+    if (event.key === 'Enter') { event.preventDefault(); el.blur(); }
+    else if (event.key === 'Escape') {
+      event.preventDefault();
+      el.textContent = currentValue(current.locale, el.dataset.copyPath);
+      el.blur();
+    }
+  });
+
+  function applySnapshot(snap) {
+    pending = new Map();
+    snap.docs.forEach(function (doc) {
+      var data = doc.data();
+      if (data && data.lang && data.key) pending.set(docId(data.lang, data.key), data);
+    });
+    updatePendingBadge();
+    if (current) scan();
+  }
+
+  // ---- boot ----
+  var initialPath = (location.hash && location.hash.slice(1)) || '';
+  if (!PAGES[initialPath]) initialPath = '/';
+  renderPage(initialPath);
+  try { if (sessionStorage.getItem('wmym-copy-edit') === '1') applyActive(true); } catch (e) {}
+
+  if (window.claude && typeof window.claude.use === 'function') {
+    window.claude.use('db').then(function (ns) {
+      db = ns;
+      if (!db) {
+        writable = false;
+        showBanner();
+        toggle.disabled = true;
+        return;
+      }
+      db.collection('edits').onSnapshot(applySnapshot, function () {
+        writable = false;
+        showBanner();
+        toggle.disabled = true;
+      });
+    });
+  } else {
+    writable = false;
+    showBanner();
+    toggle.disabled = true;
+  }
+})();
+</script>

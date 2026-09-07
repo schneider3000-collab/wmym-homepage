@@ -65,6 +65,45 @@ The whole thing is dev-only: `src/dev/copy-editor-plugin.mjs` registers with
 `apply: 'serve'` and the component renders behind `import.meta.env.DEV`, so no markup,
 CSS or script reaches a build. Verified — `npm run build` still emits zero JS bundles.
 
+### Editing copy without a dev server
+
+There is also a standalone page — a Claude Artifact, not part of this build — that
+mirrors the actual built site: every page, both languages, real layout and images,
+browsable by clicking around exactly like the live site. Pressing **Edit copy** there
+turns on the same click-to-edit interaction as the dev-only in-browser editor above, so
+copy can be edited from a plain browser with no dev server, no `npm install`, from any
+device. Its URL is recorded in `.claude/copy-editor.json`.
+
+Edits made there don't touch this repository directly; they queue in the artifact's own
+database until Claude reads them back with `node scripts/apply-copy-edits.mjs` and
+applies them to `de.ts`/`en.ts` as a normal patch.
+
+The artifact itself is a frozen snapshot, not a live render — `npm run build` regenerates
+it automatically as a `postbuild` step (`scripts/build-copy-editor-snapshot.mjs`, reading
+only the local `dist/` output, no network needed), but the *build* only refreshes the
+file on disk at `.claude/copy-editor-snapshot.html`. Getting that onto the actual artifact
+page still needs Claude to republish it — pass the same `file_path` and the `url` from
+`.claude/copy-editor.json` so the link doesn't change. Do that whenever the site's
+design, layout, images, or content keys change meaningfully; a pure wording change
+doesn't need a republish, since the artifact keeps showing a synced edit from its own
+queue rather than falling back to what was baked in at publish time — which is exactly
+why a synced edit is marked `{ applied: true }` in the database rather than deleted once
+`apply-copy-edits.mjs` has merged it into `de.ts`/`en.ts`. Deleting it immediately would
+make the artifact revert to displaying the stale pre-edit text until the next republish.
+Prune `applied: true` documents from the artifact's `edits` collection only right after a
+republish, once their values are safely baked into the fresh snapshot.
+
+Because the sync-back step is manual, a pre-commit check
+(`scripts/check-copy-editor-sync.mjs`) blocks a commit if edits were pulled from the
+artifact and left unapplied mid-sync (tracked in the gitignored
+`.claude/copy-editor-pending.json`). It is a no-op anywhere else — a plain clone or CI,
+which never has that scratch file, always passes. Skip it deliberately with
+`SKIP_COPY_EDITOR_CHECK=1 git commit …`, the same pattern as `SKIP_I18N_CHECK`.
+
+The page-scoping rules that keep ambiguous strings (`Angebot` as both a nav label and a
+heading) from being misattributed live once, in `src/dev/copy-scope.mjs`, shared by both
+editors — change them there, not in `CopyEditor.astro` or the snapshot generator.
+
 ### Keeping the two languages in step
 
 Two different failure modes, two different guards:
@@ -195,10 +234,17 @@ DNS at the registrar needs either four `A` records pointing at
 
 ## Notes on some decisions
 
-**Fonts are self-hosted.** Astro's fonts API downloads Fraunces, Inter and
-IBM Plex Mono at build time and serves them from this origin. No request ever
-reaches Google, which is what lets the privacy page honestly claim no third-party
-connections — a real concern for an Austrian practice under GDPR.
+**Fonts are self-hosted and vendored, not fetched.** Fraunces, Inter and IBM Plex Mono
+ship as `@fontsource*` npm packages (regular `dependencies`); `astro.config.mjs` wires
+Astro's fonts API to those local files with the `local` provider, so `npm run build`
+needs no network access at all — it used to call out to Google Fonts at build time,
+which silently produced fonts with no `@font-face` rules (fallback fonts, easy to miss)
+in any sandbox without a route to `fonts.gstatic.com`. Astro still copies the files into
+the build under hashed names with metric-matched fallbacks and serves them from this
+origin either way, which is what lets the privacy page honestly claim no third-party
+connections reachable by a visitor's browser — a real concern for an Austrian practice
+under GDPR. Only the "latin" subset is included; German's `äöüß` all live in Latin-1, so
+nothing here needs the fuller "latin-ext" subset.
 
 Do not redefine `--font-display`, `--font-body` or `--font-mono` in CSS: Astro
 registers the families under hashed names with metric-matched fallbacks, and

@@ -4,35 +4,14 @@
 // tagging every element, which keeps the views free of editor-specific markup.
 import type { Locale, RouteKey } from '../../content';
 import { useContent } from '../../content';
+import { scopeToRoute } from '../../dev/copy-scope.mjs';
 
 interface Props { locale: Locale; current: RouteKey }
 const { locale, current } = Astro.props;
 
-// Only the sections this page renders. Without this, a word like "Kontakt" matches
-// keys on pages that are not even open, and every one of them has to be skipped.
-const PAGE_SECTIONS: Record<RouteKey, string[]> = {
-  home: ['home', 'programmes'],
-  offerings: ['offerings', 'programmes'],
-  method: ['method'],
-  research: ['research'],
-  about: ['about'],
-  contact: ['contact'],
-  imprint: ['legal'],
-  privacy: ['legal'],
-};
-const ALWAYS = ['nav', 'brand', 'footer', 'common'];
-const allowed = new Set([...PAGE_SECTIONS[current], ...ALWAYS]);
-
-// Not copy: URLs, route paths and locale plumbing would only create false matches.
-const SKIP_PREFIX = ['routes.'];
-const SKIP_LEAF = ['href', 'linkTo', 'anchor', 'id', 'locale', 'htmlLang', 'otherLocale'];
-
 function flatten(value: unknown, prefix = '', out: Record<string, string> = {}) {
   if (typeof value === 'string') {
-    const leaf = prefix.split('.').pop() ?? '';
-    if (!SKIP_PREFIX.some((p) => prefix.startsWith(p)) && !SKIP_LEAF.includes(leaf)) {
-      out[prefix] = value;
-    }
+    out[prefix] = value;
   } else if (Array.isArray(value)) {
     value.forEach((item, i) => flatten(item, `${prefix}.${i}`, out));
   } else if (value && typeof value === 'object') {
@@ -43,10 +22,7 @@ function flatten(value: unknown, prefix = '', out: Record<string, string> = {}) 
   return out;
 }
 
-const all = flatten(useContent(locale));
-const copyMap = Object.fromEntries(
-  Object.entries(all).filter(([key]) => allowed.has(key.split('.')[0])),
-);
+const copyMap = scopeToRoute(flatten(useContent(locale)), current);
 ---
 
 <div id="copy-editor-bar" data-copy-skip>
