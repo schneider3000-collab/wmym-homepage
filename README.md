@@ -234,10 +234,17 @@ DNS at the registrar needs either four `A` records pointing at
 
 ## Notes on some decisions
 
-**Fonts are self-hosted.** Astro's fonts API downloads Fraunces, Inter and
-IBM Plex Mono at build time and serves them from this origin. No request ever
-reaches Google, which is what lets the privacy page honestly claim no third-party
-connections — a real concern for an Austrian practice under GDPR.
+**Fonts are self-hosted and vendored, not fetched.** Fraunces, Inter and IBM Plex Mono
+ship as `@fontsource*` npm packages (regular `dependencies`); `astro.config.mjs` wires
+Astro's fonts API to those local files with the `local` provider, so `npm run build`
+needs no network access at all — it used to call out to Google Fonts at build time,
+which silently produced fonts with no `@font-face` rules (fallback fonts, easy to miss)
+in any sandbox without a route to `fonts.gstatic.com`. Astro still copies the files into
+the build under hashed names with metric-matched fallbacks and serves them from this
+origin either way, which is what lets the privacy page honestly claim no third-party
+connections reachable by a visitor's browser — a real concern for an Austrian practice
+under GDPR. Only the "latin" subset is included; German's `äöüß` all live in Latin-1, so
+nothing here needs the fuller "latin-ext" subset.
 
 Do not redefine `--font-display`, `--font-body` or `--font-mono` in CSS: Astro
 registers the families under hashed names with metric-matched fallbacks, and
