@@ -64,5 +64,9 @@ if (failed.length) {
 } else {
   await unlink(PENDING_FILE).catch(() => {});
   console.log(`Applied ${appliedCount} edit(s) from the copy-editor artifact. ${PENDING_FILE} cleared.`);
-  console.log('Remember to also delete the applied documents from the artifact\'s "edits" collection.');
+  console.log(
+    'Mark the applied documents { applied: true } in the artifact\'s "edits" collection ' +
+      '(write_db update, not delete) — the snapshot still needs them as an override until ' +
+      'the artifact is next republished with these values baked into ORIGINALS.',
+  );
 }

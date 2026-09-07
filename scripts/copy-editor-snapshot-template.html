@@ -156,9 +156,17 @@
   }
 
   function currentValue(lang, key) {
+    // Read from the queue whether or not it's been synced yet — a synced edit stays
+    // here, still overriding the snapshot's baked-in value, until a republish bakes
+    // it into ORIGINALS and Claude prunes the now-redundant queue entry.
     var p = pending.get(docId(lang, key));
     return p ? p.value : ORIGINALS[lang][key];
   }
+
+  // A queued edit Claude has already merged into de.ts/en.ts (applied: true) is no
+  // longer something to act on — only unsynced edits count toward "pending" and get
+  // the dirty outline.
+  function outstanding(record) { return !!record && !record.applied; }
 
   function scan() {
     targets = [];
@@ -174,7 +182,7 @@
       if (!key) { ambiguous.add(text); return; }
       el.dataset.copyPath = key;
       el.title = key;
-      if (pending.has(docId(current.locale, key))) el.dataset.dirty = 'true';
+      if (outstanding(pending.get(docId(current.locale, key)))) el.dataset.dirty = 'true';
       else delete el.dataset.dirty;
       // A key can appear more than once verbatim on a page (e.g. a repeated CTA
       // label); render every occurrence from its queued value, not just the first.
@@ -206,7 +214,8 @@
   }
 
   function updatePendingBadge() {
-    var n = pending.size;
+    var n = 0;
+    pending.forEach(function (record) { if (outstanding(record)) n++; });
     pendingEl.textContent = n + ' pending';
     pendingEl.classList.toggle('show', n > 0);
   }

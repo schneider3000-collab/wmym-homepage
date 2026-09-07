@@ -85,8 +85,13 @@ file on disk at `.claude/copy-editor-snapshot.html`. Getting that onto the actua
 page still needs Claude to republish it — pass the same `file_path` and the `url` from
 `.claude/copy-editor.json` so the link doesn't change. Do that whenever the site's
 design, layout, images, or content keys change meaningfully; a pure wording change
-doesn't need a republish, since the artifact reads current values from its own edit
-queue, not from what was baked in at publish time.
+doesn't need a republish, since the artifact keeps showing a synced edit from its own
+queue rather than falling back to what was baked in at publish time — which is exactly
+why a synced edit is marked `{ applied: true }` in the database rather than deleted once
+`apply-copy-edits.mjs` has merged it into `de.ts`/`en.ts`. Deleting it immediately would
+make the artifact revert to displaying the stale pre-edit text until the next republish.
+Prune `applied: true` documents from the artifact's `edits` collection only right after a
+republish, once their values are safely baked into the fresh snapshot.
 
 Because the sync-back step is manual, a pre-commit check
 (`scripts/check-copy-editor-sync.mjs`) blocks a commit if edits were pulled from the
