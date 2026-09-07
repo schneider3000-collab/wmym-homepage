@@ -48,7 +48,7 @@ export const en: SiteContent = {
     lede:
       'Feldenkrais practice and movement research for people who want to move more freely, more safely and with less pain — in Vienna, grounded in scientific work at the University of Vienna.',
     ctaPrimary: 'Request an appointment',
-    ctaSecondary: 'See what I offer',
+    ctaSecondary: 'What I offer',
     heroImageAlt:
       'Stefan M. Schneider, Feldenkrais practitioner in Vienna, in the studio',
 
