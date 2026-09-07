@@ -157,23 +157,39 @@ Connect the repository and use:
 `public/_headers` is picked up automatically and adds security headers plus
 immutable caching for fingerprinted assets. Nothing else to configure.
 
-### GitHub Pages
+### GitHub Pages (current setup)
 
-`.github/workflows/deploy.yml` builds and publishes on every push to `main`.
-Enable Pages with source *GitHub Actions* in the repository settings.
+`.github/workflows/deploy.yml` verifies, builds and publishes on every push to
+`main`. Pages is enabled with source *GitHub Actions*.
 
-Serving from a **custom domain** works as-is. Serving from a **project path**
-(`user.github.io/whatmakesyoumove`) additionally needs `BASE_PATH` in the
-workflow's build step:
+The site currently builds for the project path:
 
-```yaml
-env:
-  SITE: https://user.github.io
-  BASE_PATH: /whatmakesyoumove
-```
+**https://schneider3000-collab.github.io/wmym-homepage/**
 
 All internal links go through `route()` in `src/content/index.ts`, which applies
-the base path, so nothing else changes.
+the base path, so the sub-path needs no other changes.
+
+While `BASE_PATH` is set the build treats itself as a preview and asks not to be
+indexed — `robots.txt` disallows everything and every page carries a `noindex`
+meta tag. Both key off `BASE_PATH`, so they disarm themselves at launch.
+
+#### Moving to whatmakesyoumove.org
+
+Three steps, all in one marked block at the top of the build step's `env:`, plus
+one new file:
+
+1. `SITE: https://whatmakesyoumove.org`
+2. delete the `BASE_PATH` line
+3. add `public/CNAME` containing `whatmakesyoumove.org`
+
+**Do step 3 last, and only once DNS resolves.** The `CNAME` file is what tells
+GitHub to switch to the custom domain; from that moment the
+`github.io/wmym-homepage` URL 301-redirects to the real domain, so adding it
+early leaves you with a deployed site and no reachable URL.
+
+DNS at the registrar needs either four `A` records pointing at
+`185.199.108.153`, `185.199.109.153`, `185.199.110.153`, `185.199.111.153`, or a
+`CNAME` on `www` pointing at `schneider3000-collab.github.io`.
 
 ---
 
