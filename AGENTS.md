@@ -36,12 +36,17 @@ touch it, re-check that `npm run build` still emits zero JS bundles and no trace
 in `dist/`.
 
 **A remote copy editor writes to a queue, not to disk.** `.claude/copy-editor.json`
-points at a standalone Claude Artifact where edits can be made without a dev server;
-those edits land in the artifact's database, not in `de.ts`/`en.ts`. Before finishing
-any session, read that database (if the config file exists) and apply pending edits
-with `node scripts/apply-copy-edits.mjs` — see README.md's "Editing copy without a dev
+points at a standalone Claude Artifact — a snapshot of the whole built site, browsable
+and editable like the live site — where edits can be made without a dev server; those
+edits land in the artifact's database, not in `de.ts`/`en.ts`. Before finishing any
+session, read that database (if the config file exists) and apply pending edits with
+`node scripts/apply-copy-edits.mjs` — see README.md's "Editing copy without a dev
 server". `.claude/copy-editor-pending.json` is scratch state for a sync in progress; a
-pre-commit check blocks a commit while it holds unapplied edits.
+pre-commit check blocks a commit while it holds unapplied edits. Separately,
+`npm run build` regenerates `.claude/copy-editor-snapshot.html` on every build
+(`postbuild`), but that only updates the file on disk — republish it to the artifact
+(same `file_path`, `url` from the config) whenever the site's design, layout, images,
+or content keys change meaningfully; wording-only changes don't need a republish.
 
 ## Before finishing
 

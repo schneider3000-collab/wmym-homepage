@@ -1,5 +1,5 @@
 {
   "artifactUrl": "https://claude.ai/code/artifact/15bb4b43-4f58-4af1-a6d9-b636590d19ff",
   "dbCollection": "edits",
-  "note": "Presence of this file is what turns on the copy-editor pre-commit check. Regenerate the artifact's payload with `node scripts/build-copy-editor-payload.mjs` and republish it whenever keys are added, renamed, or removed in de.ts/en.ts."
+  "note": "Presence of this file is what turns on the copy-editor pre-commit check. `npm run build` regenerates .claude/copy-editor-snapshot.html automatically (postbuild); republish it to this same artifactUrl (Artifact tool, same file_path/url so the link doesn't change) whenever the site's markup, styling, images, or content keys change meaningfully. See README.md's \"Editing copy without a dev server\"."
 }

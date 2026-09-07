@@ -8,11 +8,12 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "postbuild": "node scripts/build-copy-editor-snapshot.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "astro": "astro",
     "i18n": "node scripts/check-i18n-parity.mjs",
-    "copy-editor:build": "node scripts/build-copy-editor-payload.mjs",
+    "copy-editor:snapshot": "node scripts/build-copy-editor-snapshot.mjs",
     "copy-editor:apply": "node scripts/apply-copy-edits.mjs",
     "copy-editor:check": "node scripts/check-copy-editor-sync.mjs",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
@@ -30,6 +31,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "linkedom": "^0.18.13",
     "typescript": "^6.0.3"
   },
   "description": "Website for the Feldenkrais practice and movement research of Stefan M. Schneider, Vienna."
