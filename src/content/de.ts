@@ -524,7 +524,7 @@ export const de = {
         period: '2016–2022',
         title: 'Internationale Projektleitung, Kairo',
         body:
-          'Leitung dreier aufeinander aufbauender Kooperationsprojekte mit der Ain Shams University Kairo, inklusive Aufbau einer E-Learning-Plattform und Organisation von Studierendenaustauschen.',
+          'Leitung dreier aufeinander aufbauender Kooperationsprojekte mit der Ain Shams Universität Kairo, inklusive Aufbau einer E-Learning-Plattform und Organisation von Studierendenaustauschen.',
       },
       {
         period: '2012–2019',
