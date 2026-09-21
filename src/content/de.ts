@@ -486,8 +486,8 @@ export const de = {
     title: 'Stefan M. Schneider — Feldenkrais-Praktiker und Kognitionswissenschaftler, Wien',
     description:
       'Feldenkrais-Praktiker, Kognitionswissenschaftler an der Universität Wien, ausgebildeter Taichi-Lehrer und Absolvent der Kunstakademie Düsseldorf. Werdegang, Publikationen und die Geschichte hinter „What makes you move“.',
-    eyebrow: 'Wien · Universität Wien',
-    headline: 'Über mich',
+    eyebrow: 'Über mich',
+    headline: 'Stefan Marco Schneider',
     lede:
       'Ich bin Feldenkrais-Praktiker und Kognitionswissenschaftler — zwei Wege, die für mich schon lange zusammengehören.',
     portraitAlt: 'Stefan M. Schneider, Feldenkrais-Praktiker in Wien, im Studio',
@@ -714,7 +714,7 @@ export const de = {
       { label: 'Instagram', href: 'https://www.instagram.com/stef.moves/' },
       { label: 'LinkedIn', href: 'https://at.linkedin.com/in/stefan-marco-schneider' },
     ],
-    copyright: 'Stefan M. Schneider',
+    copyright: 'Stefan Marco Schneider',
   },
 
   legal: {
