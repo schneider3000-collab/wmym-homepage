@@ -486,8 +486,8 @@ export const en: SiteContent = {
     title: 'Stefan M. Schneider — Feldenkrais practitioner and cognitive scientist, Vienna',
     description:
       'Feldenkrais practitioner, cognitive scientist at the University of Vienna, certified Taichi teacher and graduate of the Kunstakademie Düsseldorf. Background, publications and the story behind “What makes you move”.',
-    eyebrow: 'Vienna · University of Vienna',
-    headline: 'About me',
+    eyebrow: 'About me',
+    headline: 'Stefan Marco Schneider',
     lede:
       'I am a Feldenkrais practitioner and a cognitive scientist — two paths that have belonged together for me for a long time.',
     portraitAlt: 'Stefan M. Schneider, Feldenkrais practitioner in Vienna, in the studio',
@@ -713,7 +713,7 @@ export const en: SiteContent = {
       { label: 'Instagram', href: 'https://www.instagram.com/stef.moves/' },
       { label: 'LinkedIn', href: 'https://at.linkedin.com/in/stefan-marco-schneider' },
     ],
-    copyright: 'Stefan M. Schneider',
+    copyright: 'Stefan Marco Schneider',
   },
 
   legal: {
