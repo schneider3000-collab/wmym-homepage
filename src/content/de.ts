@@ -24,7 +24,7 @@ export const de = {
     claim: 'Was dich bewegt.',
     owner: 'Stefan M. Schneider',
     role: 'Feldenkrais-Praxis und Bewegungsforschung, Wien.',
-    email: 'stefan@recursive.work',
+    email: 'stefan@whatmakesyoumove.org',
     city: 'Wien',
   },
 
@@ -172,10 +172,10 @@ export const de = {
       'Die drei Programmlinien sind die primäre Angebotsstruktur — jede mit eigener Verankerung in der Praxis, kein rein theoretisches Konstrukt. Alle laufen als fortlaufende Reihe, ausgelegt auf rund zwölf Einheiten, mit Aufzeichnung für Teilnehmende.',
 
     fiHeadline: 'Einzelstunden — FI (Functional Integration)',
-    fiStatus: 'Derzeit pausiert',
+    fiStatus: 'praktikum',
     fiBody:
-      'FI ist die persönlichste Form der Feldenkrais-Arbeit — Hand-Arbeit, exakt auf dich abgestimmt. Ich befinde mich noch in der Ausbildung dazu, und aktuell fehlt mir zusätzlich ein passender Raum dafür. FI ist daher im Moment nicht buchbar. Trag dich gern unverbindlich ein, ich melde mich, sobald FI startet.',
-    fiCta: 'Interesse hinterlassen',
+      'FI ist die persönlichste Form der Feldenkrais-Arbeit — Hand-Arbeit, exakt auf dich abgestimmt. Ich befinde mich noch in der Ausbildung dazu, und biete Stunden aktuell als Praktikum an (gratis; gern gegen Spende; späterer Regulärpreis 100 € / Stunde). Melde dich bei mir, ich freue mich auf die Stunde mit dir!',
+    fiCta: 'Einzelstunde buchen',
 
     workshopsHeadline: 'Workshops & Fortbildung für Institute und Ausbildungsstätten',
     workshopsLede: 'Wissenschaftlicher Tiefgang für alle, die selbst mit Bewegung arbeiten.',
@@ -281,20 +281,20 @@ export const de = {
         title: 'Woher die Methode kommt',
         body: [
           'Entwickelt wurde die Methode von Moshe Feldenkrais (1904–1984), Physiker und Judoka, der seine eigenen Knieverletzungen zum Ausgangspunkt nahm, um zu untersuchen, wie eng Bewegung, Wahrnehmung und Lernen miteinander verbunden sind.',
-          'Seit Jahrzehnten wird die Methode weltweit in anerkannten, mehrjährigen Ausbildungsgängen weitergegeben — auch meine eigene Ausbildung folgt diesem Standard.',
+          'Seit Jahrzehnten wird die Methode weltweit in anerkannten, mehrjährigen Ausbildungsgängen weitergegeben — auch meine eigene Ausbildung am Feldenkrais Institut Wien folgt diesem Standard.',
         ],
       },
       {
         title: 'Ein anderes Verständnis von Gesundheit',
         body: [
           'Gesundheit wird oft als Abwesenheit von Krankheit verstanden. Aber viele Menschen, die medizinisch als geheilt gelten, kommen trotzdem nicht mehr richtig in ihr Leben zurück.',
-          'Ein anderer, hilfreicherer Gedanke: Gesundheit ist die Fähigkeit, aus dem Gleichgewicht zu geraten — durch Krankheit, durch eine Diagnose, durch eine Lebenskrise — und einen Weg zurück zur eigenen Balance zu finden. Nicht die Abwesenheit von Erschütterung, sondern die Fähigkeit, mit ihr umzugehen. Genau hier setzt Feldenkrais an: nicht bei der Frage „Was fehlt?“, sondern bei der Frage „Was kann ich gerade noch spüren, und wie finde ich von dort aus einen Weg?“',
+          'Ein anderer, hilfreicherer Gedanke: Gesundheit ist die Fähigkeit, aus dem Gleichgewicht zu geraten — durch Krankheit, durch eine Diagnose, durch eine Lebenskrise — und einen Weg zurück zur eigenen Balance zu finden. Nicht die Abwesenheit von Erschütterung, sondern die Fähigkeit, mit ihr umzugehen. Genau hier setzt Feldenkrais an: nicht bei der Frage „Was fehlt?“, sondern bei der Frage „Was spüre ich genau jetzt, in diesem Moment, und wie finde ich von dort aus einen Weg?“',
         ],
       },
       {
         title: 'Warum es wirkt',
         body: [
-          'Das ist auch die Frage, die mich als Wissenschaftler beschäftigt: Warum verändert sich etwas, wenn man nur bewusst wahrnimmt, ohne zu trainieren?',
+          'Das ist auch die Frage, die mich als Wissenschaftler beschäftigt: Warum verändert sich etwas, und besser und nachhaltiger, durch bewusstes Entdecken, feines Wahrnehmen, und Neugierde - statt striktem Training?',
           'Genau das untersuche ich in meiner Forschung — unter anderem aktuell bei Menschen mit Parkinson, wo dieses Prinzip besonders viel bewirken kann. Verkörperung reicht dabei tiefer als reines Nachdenken: Das Nervensystem lernt über Erfahrung, nicht über Einsicht.',
         ],
       },
@@ -495,7 +495,7 @@ export const de = {
     meta: [
       { label: 'Tätigkeit', value: 'Feldenkrais-Praxis und Bewegungsforschung' },
       { label: 'Institution', value: 'Universität Wien' },
-      { label: 'Schwerpunkte', value: 'Embodiment · somatisches Lernen · mentale Vorstellung' },
+      { label: 'Schwerpunkte', value: 'Neuro-motorisches Lernen · Embodiment · Imagination · Kreativität' },
       { label: 'ORCID', value: '0000-0002-0724-8282' },
     ],
 
@@ -509,22 +509,22 @@ export const de = {
     storyBody: [
       'Meine Bewegungsgeschichte beginnt nicht mit einer Tanzausbildung, sondern mit einem Knie. Seit meinem fünfzehnten Lebensjahr renkte es sich mehrmals im Jahr aus; mit 22 konnte ich vor Schmerzen kaum noch gehen. Eine Fehlstellung wurde operativ korrigiert, danach folgten über zwanzig Jahre Physiotherapie und Krafttraining — und die immer gleiche Erfahrung, dass manche Dinge sich einfach nicht verbesserten. Jeder Schritt tat ein bisschen weh, und die Spannung setzte sich über Hüfte und Wirbelsäule bis in den Nacken fort.',
       'Dazu kam mit 19 ein schwerer Sturz aus großer Höhe. Die Brüche heilten gut, aber danach war ich steif und zutiefst verunsichert, was ich mir zutrauen durfte. Aus diesen Voraussetzungen habe ich mir Stück für Stück erschlossen, was möglich ist: Schwimmen, Taekwondo bis zum Wettkampfniveau, Segel- und Drachenfliegen, fünfzehn Jahre Taichi in einem System, das die innere Form sehr präzise kultiviert.',
-      'Gelöst hat sich der Schmerzpunkt im Knie erst mit 45 — durch eine Kombination aus Feldenkrais und gezieltem Training. Es zeigte sich, dass gerade das gut gemeinte Führen des Knies in der Schiene zu wenig Rotation zugelassen hatte. Seitdem freut mich jede Bewegung in diesem Bereich. Das ist der Grund, warum ich diese Arbeit mache: Ich weiß aus eigener Erfahrung, wie es ist, bewegungsdetektivisch nach einem Weg zu suchen — und ihn zu finden.',
+      'Gelöst hat sich der Schmerzpunkt im Knie erst mit 45 — durch eine Kombination aus Feldenkrais und gezieltem Training. Es zeigte sich, dass gerade das gut gemeinte Kontrollieren des Knies zu wenig Flexibilität zugelassen hatte. Seitdem freut mich jede Bewegung in diesem Bereich. Das ist der Grund, warum ich diese Arbeit mache: Ich weiß aus eigener Erfahrung, wie es ist, bewegungsdetektivisch nach einem Weg zu suchen — und ihn zu finden.',
     ],
 
-    timelineHeadline: 'Stationen eines langen Lernens',
+    timelineHeadline: 'Stationen eines langen Lernens und Arbeitens',
     timeline: [
       {
         period: 'seit 2020',
         title: 'Universität Wien',
         body:
-          'Zuletzt Co-Principal Investigator des FWF-Projekts „Creative Conversations with Materials“ zu Kreativität in künstlerischen Schaffensprozessen; zuvor Associate Researcher im FWF-Projekt zu zwischenleiblichen Synergiepraktiken (Akro-Yoga, Taichi Push Hands, Kontaktimprovisation).',
+          'Zuletzt Co-Principal Investigator des FWF-Projekts „Creative Conversations with Materials“ zu Kreativität in künstlerischen Schaffensprozessen; zuvor Co-Principal Investigator im FWF-Projekt zu zwischenleiblichen Synergiepraktiken (Akro-Yoga, Taichi Push Hands, Kontaktimprovisation).',
       },
       {
         period: '2016–2022',
         title: 'Internationale Projektleitung, Kairo',
         body:
-          'Leitung dreier aufeinander aufbauender Kooperationsprojekte mit der Ain Shams Universität Kairo, inklusive Aufbau einer E-Learning-Plattform und Organisation von Studierendenaustauschen.',
+          'Leitung dreier aufeinander aufbauender Kooperationsprojekte mit der Ain Shams Universität Kairo, inklusive Aufbau einer E-Learning-Plattform, Organisation von Studierendenaustauschen, und Summer Schools mit internationalen Sprechern.',
       },
       {
         period: '2012–2019',
@@ -559,11 +559,11 @@ export const de = {
 
     pubsHeadline: 'Publikationen zu Bewegung, Wahrnehmung und Lernen',
     pubsIntro:
-      'Meine Forschung untersucht, was in Wahrnehmung und Körper geschieht, wenn Bewegung über Sprache angeleitet wird — also genau das, was in jeder Feldenkrais-Stunde passiert.',
+      'Meine Forschung untersucht, was in Wahrnehmung und Körper geschieht, wenn Bewegung über Sprache angeleitet wird — also genau das, was in jeder Feldenkrais-Stunde geschieht.',
     pubs: [
       {
         year: '2026',
-        authors: 'Schneider, S. M., & Kimmel, M.',
+        authors: 'Kimmel, M. & Schneider, S. M.',
         titleText: '„Mind Your Own Business“: Taichi Synergies From Individual Coordination To Collective Physics',
         venue: 'Journal of Expertise',
         href: '',
@@ -620,7 +620,7 @@ export const de = {
 
     artHeadline: 'Malerei und Zeichnung',
     artBody: [
-      'Bevor ich Bewegung erforscht und unterrichtet habe, habe ich sie gezeichnet. Ich habe an der Kunstakademie Düsseldorf studiert und arbeite bis heute mit Tusche und Papier. Zeichnen war meine erste Schule des Wahrnehmens. Feldenkrais ist die zweite — mit denselben Fragen, anderen Mitteln.',
+      'Bevor ich Bewegung erforscht und unterrichtet habe, habe ich sie gemalt. Ich habe an der Kunstakademie Düsseldorf studiert und arbeite bis heute mit Tusche und Papier. Malerei war meine erste Schule des Wahrnehmens. Feldenkrais ist die zweite — mit denselben Fragen, anderen Mitteln.',
     ],
     artPull:
       'Meine Malerei speist sich aus der Empfindung von Raum, Bewegung, Geschwindigkeit und Körperlichkeit — und aus dem Material Tusche und Papier.',
@@ -638,7 +638,7 @@ export const de = {
 
     neuro9Headline: 'Neuro9 — Feldenkrais online für Menschen mit Parkinson',
     neuro9Body:
-      'Gemeinsam mit Kolleginnen und Kollegen aus mehreren Ländern habe ich Neuro9 gegründet: eine Kooperative, die kurze, häufige Online-Stunden für Menschen mit Parkinson zugänglich macht.',
+      'Gemeinsam mit Kolleginnen und Kollegen aus mehreren Ländern habe ich Neuro9 gegründet: eine internationale Kooperative, die kurze, häufige Online-Stunden für Menschen mit Parkinson zugänglich macht.',
     neuro9Cta: 'Das Projekt ansehen',
     neuro9Href: 'https://neuro9.org/',
   },

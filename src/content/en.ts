@@ -24,7 +24,7 @@ export const en: SiteContent = {
     claim: 'What moves you.',
     owner: 'Stefan M. Schneider',
     role: 'Feldenkrais practice and movement research, Vienna.',
-    email: 'stefan@recursive.work',
+    email: 'stefan@whatmakesyoumove.org',
     city: 'Vienna',
   },
 
