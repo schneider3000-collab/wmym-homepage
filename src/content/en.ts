@@ -731,7 +731,7 @@ export const en: SiteContent = {
         },
         {
           title: 'Contact',
-          lines: ['stefan@recursive.work'],
+          lines: ['stefan@whatmakesyoumove.org'],
         },
         {
           title: 'Business purpose',
@@ -778,7 +778,7 @@ export const en: SiteContent = {
       blocks: [
         {
           title: 'Controller',
-          lines: ['Stefan Marco Schneider, Vienna — reachable at stefan@recursive.work.'],
+          lines: ['Stefan Marco Schneider, Vienna — reachable at stefan@whatmakesyoumove.org.'],
         },
         {
           title: 'No cookies, no tracking',
@@ -808,7 +808,7 @@ export const en: SiteContent = {
         {
           title: 'Your rights',
           lines: [
-            'You have the right to information, rectification, erasure, restriction of processing, data portability and objection. To exercise them, simply write to stefan@recursive.work.',
+            'You have the right to information, rectification, erasure, restriction of processing, data portability and objection. To exercise them, simply write to stefan@whatmakesyoumove.org.',
             'The supervisory authority for complaints is the Austrian Data Protection Authority, Barichgasse 40–42, 1030 Vienna.',
           ],
         },
