@@ -732,7 +732,7 @@ export const de = {
         },
         {
           title: 'Kontakt',
-          lines: ['stefan@recursive.work'],
+          lines: ['stefan@whatmakesyoumove.org'],
         },
         {
           title: 'Unternehmensgegenstand',
@@ -779,7 +779,7 @@ export const de = {
       blocks: [
         {
           title: 'Verantwortlich',
-          lines: ['Stefan Marco Schneider, Wien — erreichbar unter stefan@recursive.work.'],
+          lines: ['Stefan Marco Schneider, Wien — erreichbar unter stefan@whatmakesyoumove.org.'],
         },
         {
           title: 'Keine Cookies, kein Tracking',
@@ -809,7 +809,7 @@ export const de = {
         {
           title: 'Deine Rechte',
           lines: [
-            'Dir stehen die Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch zu. Wende dich dafür formlos an stefan@recursive.work.',
+            'Dir stehen die Rechte auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch zu. Wende dich dafür formlos an stefan@whatmakesyoumove.org.',
             'Beschwerdebehörde ist die Österreichische Datenschutzbehörde, Barichgasse 40–42, 1030 Wien.',
           ],
         },
